@@ -1,128 +1,371 @@
-# fix9900
+# uConsole trackpad keyboard firmware
 
-Fork of [Bill-lulu/uc9900](https://github.com/Bill-lulu/uc9900) by Daniel Gentleman
-(thoughtfix, <daniel@danielgentleman.com>). MIT licensed, same as
-upstream. See `LICENSE.txt`.
+Custom firmware for the [hack2you uConsole trackpad keyboard kit](https://hack2you.tech/products/uconsole-trackpad-keyboard):
+the replacement uConsole keyboard with an optical trackpad in place of the
+trackball.
 
-## Where this code comes from
+It carries over the features of the [qmk-uconsole](https://github.com/jhob101/qmk-uconsole)
+firmware for the original keyboard (gamepad mode, hold-Select scrolling, the
+keyboard lock) and adds a few of its own, all inside the firmware. Nothing
+needs to run on the uConsole itself: no keyd, no remapping daemon.
 
-Three separate codebases, maintained by three different people, are stacked
-on top of each other here:
+> **Flash at your own risk.** This is a spare-time project, developed and tested
+> on one keyboard. Keep a copy of the firmware you are running now before you
+> flash anything (see [Flashing](#flashing)).
 
-- **[ZMK](https://github.com/zmkfirmware/zmk)**: the open-source keyboard
-  firmware project everything is built on. We don't touch this layer.
-- **[ZitaoTech's ZMK fork](https://github.com/ZitaoTech/zmk)**
-  (`bbkeyboard_tp` branch): adds the actual BB9900/uConsole hardware
-  support on top of ZMK core (the trackpad sensor driver, board
-  definition, etc.).
-- **[Bill-lulu/uc9900](https://github.com/Bill-lulu/uc9900)**: the
-  keymap/config layer on top of ZitaoTech's hardware support, adapted for
-  the uConsole. Most of what this fork fixes (see below and
-  `config/NOTES.md`) turned out to be porting mistakes in this layer, not
-  bugs in ZMK or in ZitaoTech's hardware support.
+## Contents
 
-Our own changes live in two places:
+- [What it does](#what-it-does)
+- [Changes in this fork](#changes-in-this-fork)
+- [Building](#building)
+- [Flashing](#flashing)
+- [Desktop setup](#desktop-setup)
+- [Customising](#customising)
+- [Known limitations](#known-limitations)
+- [Credits and licence](#credits-and-licence)
 
-- **This repo** (`config/`): keymap-level fixes (volume, right-side
-  modifiers, Pause/Start, the bootloader combo).
-- **[thoughtfix/zmk](https://github.com/thoughtfix/zmk)**, branch
-  `bbkeyboard_tp-fix9900`: our fork of ZitaoTech's ZMK fork, for fixes that
-  needed real C changes rather than just a keymap edit (the Enter key's
-  matrix-transform bug, the CapsLock/scroll-mode decoupling, the trackpad
-  click-to-toggle scroll behavior, and the volume shift-intercept behavior).
-  `config/west.yml` points here instead of at ZitaoTech's branch.
+## What it does
 
-We are not attempting to track either upstream via rebase. Both have
-diverged enough by now, and Bill-lulu's own history is rough enough, that a
-clean rebase isn't realistic. If either upstream lands a fix we need, we'll
-cherry-pick or manually backport that specific change rather than rebasing
-this fork wholesale. Treat this as a standalone maintenance line from here
-on, not a tracking branch.
+The firmware is [ZMK](https://zmk.dev). The keyboard connects over USB only;
+Bluetooth is switched off.
 
-## ⚠️ Flash at your own risk
+### Keyboard mode
 
-This firmware controls a real, physical keyboard and trackpad. A bad flash
-can leave the board unresponsive to normal input. The bootloader-entry
-combos below exist specifically so you can recover from that, but we can't
-guarantee every board, cable, or host setup behaves identically. **Before
-flashing anything from this repo, keep a copy of whatever `.uf2` your board
-currently runs** (e.g. `CURRENT.UF2`), so you always have a known-good file
-to flash back to if something goes wrong.
+This is the normal mode. Letters, numbers and punctuation are as printed.
 
-Every change below has been flash-tested on real hardware, but this is a
-small, unpaid, spare-time fork, not a supported product. No warranty,
-express or implied. Use at your own risk.
+| Control | What it does |
+| --- | --- |
+| Trackpad | Moves the pointer. Pressing it is a left click. |
+| L / R buttons | Left click / right click. |
+| D-pad | Arrow keys. |
+| Select | Hold it and move the trackpad to scroll. A tap on its own sends the Select key (`KEY_FRONT` on Linux). |
+| Start | Super. |
+| A | The [kitty key](#kitty-key). |
+| Y, B | Hold either and the D-pad moves the pointer. A quick tap on its own sends F21 (Y) or F23 (B). |
+| X | F22. |
+| Speaker | Volume down. With Shift, volume up. With Fn, mute. |
+| Shift, Ctrl, Alt, AltGr | [One-shot modifiers](#one-shot-modifiers). |
 
-## Major changes compared to uc9900 source
+### One-shot modifiers
 
-1. Fixed volume control. Pressing the speaker key lowers volume. Pressing it while holding Shift raises volume. Pressing it with Fn mutes/unmutes.
-2. Caps Lock is now ONLY Caps Lock: no LED, and no effect on the trackpad. Caps Lock and Scroll Lock previously switched the trackpad into scroll mode silently as a side effect; that's gone too.
-3. Clicking down on the trackpad is no longer a mouse click. Mouse clicks stay on the dedicated left/right buttons. A trackpad click now toggles between cursor mode and scroll mode, with some cardinal-direction snapping so scrolling doesn't drift diagonally.
-4. Fixed Right Alt and Right Ctrl, which went completely dead under either Fn layer. Some of that space was previously reserved for BLE controls, but the keyboard inside the uConsole uses USB only, so those BLE bindings could be freed up.
-5. Fixed the Pause/Start key, which was firing phantom mouse-button clicks instead of a Pause keypress.
-6. Fixed a completely dead Enter key, caused by a one-column error in the keyboard's matrix transform.
-7. Added a second, safer "flash mode" combo: **LCtrl+LAlt+\\** (in addition to the existing Fn+\\), because a two-key combo that essentially unplugs the keyboard/trackpad deserves to sit behind something less accidental. Fn+\\ is NOT YET REMOVED. I'd like to confirm with Bill-lulu that it's safe to drop, since other `uc9900` users may already depend on it, and I don't have a USB jig here to independently confirm the side button/switch still reaches flash mode if the key-combo path is ever removed entirely.
+Tap Shift, Ctrl, Alt or AltGr and let go, and it applies to the next key only.
+Tap Shift, then `a`, and you get `A`. Holding a modifier down works as normal.
+A tap that is never used expires after 60 seconds.
 
-See [`config/NOTES.md`](config/NOTES.md) for in-depth details on all of the above, including a couple of warnings worth knowing before you start poking at this yourself.
+### Kitty key
 
-## Installing
+The A button is a one-shot Ctrl+Shift for the [kitty](https://sw.kovidgoyal.net/kitty/)
+terminal, whose shortcuts are all Ctrl+Shift+something. Tap A, then C, and the
+keyboard sends Ctrl+Shift+C. Holding A works too.
 
-Firmware builds automatically via GitHub Actions on every push (same CI setup as upstream). Fork this repo, push any change, then grab `bb9900-zmk.uf2` from the resulting Actions run's artifacts. No local toolchain required for that path.
+It covers these keys:
 
-If you'd rather build locally, useful if you want to modify the firmware yourself, or just don't want to trust a stranger's compiled binary for something with keyboard input (a reasonable instinct), see the "Building locally" section of `config/NOTES.md`.
+- Letters `Q W E R T P S F G H J K L X C V B N M`
+- `Enter`, the arrow keys, `[ ] / - = , .`
+- `1` to `9`, which send Ctrl+Shift+F1 to Ctrl+Shift+F9
 
-## Found a bug?
+Any other key is sent unchanged and ends the one-shot.
 
-Open a GitHub Issue on this fork. Include what you pressed, what you expected, and what actually happened. A `libinput debug-events --show-keycodes` capture (see `config/NOTES.md`) is the single most useful piece of evidence if you're on a Linux host and can grab one.
+### Fn keys
 
-## AI disclosure
+Either Fn key works unless a row says otherwise.
 
-Generative AI was used in the development of this fork. Visual Studio Code with the Claude extension was instrumental in providing code quality and speed that wouldn't have come from a lone developer in a reasonable amount of time. This is especially true in keeping track of the large tables of keypress-to-function mappings and the rabbit-hole investigations.
+| Keys | What it does |
+| --- | --- |
+| Fn + `1` to `0` | F1 to F10 |
+| Fn + `-`, Fn + `=` | F11, F12 |
+| Fn + Backspace | Delete |
+| Fn + Tab | Caps Lock (there is no indicator light) |
+| Fn + U, Fn + K | Page Up, Page Down |
+| Fn + H, Fn + J | Home, End |
+| Fn + I | Insert |
+| Fn + `,`, Fn + `.` | Screen brightness down, up |
+| Fn + Space | Key backlight on/off |
+| Fn + Speaker | Mute |
+| Fn + Select | Print |
+| Fn + Start | Media pause |
+| Fn + G | [Gamepad mode](#gamepad-mode) on/off |
+| Fn + Esc | [Lock](#lock) / unlock |
+| Fn + `\` | Enter the bootloader, for flashing |
+| Left Fn + D-pad up / down | Volume up / down |
+| Left Fn + Left Alt | Super |
+| Right Fn, then Left Fn | Restart the keyboard firmware |
 
-A more detailed accounting of specific AI contributions will be added here after independent human review of the code.
+### Gamepad mode
 
-## From this part down is the original README.md of Bill-lulu
-# First thanks to [Zitaotech](https://github.com/ZitaoTech)
+Fn + G toggles it. The keyboard shows up to the uConsole as a joystick as well
+as a keyboard and mouse (`/dev/input/js0` on Linux), and in gamepad mode:
 
-I modify his fireware to our project,whitout his help ,we cannt see trackpad on uconsole ,thanks to him and his many interesting productions.
+| Control | Joystick |
+| --- | --- |
+| D-pad | X and Y axes. If two opposite directions are held, the last one pressed wins. |
+| A, B, X, Y | Buttons 1, 2, 3, 4 |
+| Select | Button 5. Holding it still scrolls with the trackpad. |
+| Start | Button 6 |
 
-# uconsole BB9900 wireless/usb Keyboard: zmk-config
-------------------------------
+Shift, Ctrl and Alt are plain modifiers here, not one-shot. Everything else
+(typing, the trackpad, the Fn keys) works as in keyboard mode.
 
-The key:
+Games will see a new controller, so button mappings in SDL or RetroArch need
+setting once. `jstest /dev/input/js0` (from the `joystick` package) shows the
+axes and buttons live.
 
-Part ONE--USB
+### Lock
 
-1.when connect uconsole via usb,ble dont work!
+Fn + Esc locks the keyboard, for carrying the uConsole around. Locking:
 
-Part TWO--BLE
+1. switches the trackpad off,
+2. turns the key backlight off,
+3. sends the screen lock key, so the desktop can blank the screen (see
+   [Desktop setup](#desktop-setup)),
+4. ignores every key and both mouse buttons.
 
-1.RFN+1 2 3 is three different equipment ,RFN+ESC is Clean BLE(when you wanna connect new equipment and clean you ble info)  
+Fn + Esc again unlocks: the trackpad comes back, the backlight returns to
+however it was, and the keyboard taps Shift so the desktop wakes the screen.
+Release Fn between locking and unlocking.
 
-2.RFN+ (\\|) is bootloader
+The lock is not remembered across a power cycle, so the keyboard always starts
+unlocked.
 
-3.RFN+LFN is soft-reset
+### Bootloader
 
+Ctrl + Alt + `\` or Fn + `\` restarts the keyboard into its bootloader for
+[flashing](#flashing). Neither works while the keyboard is locked.
 
-New update need you help
+## Changes in this fork
 
-1.LFN +trackpad is ↑↓←→
+This is a fork of [thoughtfix/fix9900](https://github.com/thoughtfix/fix9900),
+which is itself a fork of the vendor's [Bill-lulu/uc9900](https://github.com/Bill-lulu/uc9900).
 
-2.Caps light！！
+Added here:
 
-3.outside Crystal oscillator works！
+- **Gamepad mode** on Fn + G, as a real USB joystick.
+- **Hold Select to scroll**, replacing fix9900's click-the-trackpad toggle.
+- **Trackpad press is left click** again.
+- **Start is Super** (it was media Play).
+- **The kitty key** on A, and **one-shot modifiers**. These replace a
+  [keyd](https://github.com/rvaiya/keyd) config on the uConsole.
+- **Y / B plus the D-pad as a mouse.**
+- **The keyboard lock** on Fn + Esc, including trackpad, backlight and screen.
+- **Bluetooth switched off.** The right Fn pairing keys (Esc, 1 to 4) now match
+  left Fn.
+- **Trackpad pointer speed** raised by 30%.
+- **Volume key fix**: Shift + Speaker no longer leaves Shift stuck on.
 
---------------------------------
-Hey 👋 welcome. Use this repo to generate your own ZMK keymap for the BB9900 BLE keyboard.  
-[Keycode that you can use in ZMK firmware](https://zmk.dev/docs/codes)  
-[Different behaviors that you can use in ZMK firmware](https://zmk.dev/docs/behaviors)  
-## Get started
-0. Register a github account if you don't have one.
-1. Fork this repo.![fork](https://github.com/ZitaoTech/zmk-config_9900/assets/145678024/4ffc71b9-0ed3-4ae9-ace7-99078dd1d9bc)  
-2. Open up `config/bb9900.keymap` and edit the keymap to your liking.![image](https://github.com/ZitaoTech/zmk-config_9900/assets/145678024/a0900a5c-6650-4794-9d11-a17c380a973d)  
-3. After editing the keymap, choose commit changes![image](https://github.com/ZitaoTech/zmk-config_9900/assets/145678024/c708dbd0-6c90-49da-aeda-053668ae43c8)
- and then check the Github Actions section.![image](https://github.com/ZitaoTech/zmk-config_9900/assets/145678024/fb534054-add6-4517-8643-8270cbf6d8c7)
- Your new firmware file should be available for download.![image](https://github.com/ZitaoTech/zmk-config_9900/assets/145678024/ae6a1646-c8ab-4966-b969-12e68ecaa0ab)
-![image](https://github.com/ZitaoTech/zmk-config_9900/assets/145678024/a6140108-9e27-4d51-aa42-ba12233b8738)
-5. Unzip the firmware.zip file. You should see one files: `bb9900-zmk.uf2`.  
-6. Flash the keyboard with your new firmware.[How to flash the firmware](https://github.com/ZitaoTech/BB9900-USB_BLE_Keyboard?tab=readme-ov-file#-how-to-update-the-firmware---) 
+Kept from thoughtfix's fix9900:
+
+- Speaker key as volume down, Shift for up, Fn for mute.
+- Caps Lock no longer interferes with the trackpad.
+- Working Enter key, right Alt and right Ctrl under Fn, and Fn + Start.
+- Ctrl + Alt + `\` as a second, harder to hit by accident, way into the bootloader.
+- Smoother trackpad scrolling, locked to one axis at a time.
+
+thoughtfix's notes on those fixes are in [`config/NOTES.md`](config/NOTES.md).
+
+Several of these needed changes to ZMK itself. Those live in
+[jhob101/zmk](https://github.com/jhob101/zmk), which this repo builds against.
+
+## Building
+
+The output of either route is one file, `bb9900-zmk.uf2` (GitHub) or `zmk.uf2`
+(local build).
+
+### On GitHub (no tools to install)
+
+1. Fork this repo and enable Actions on your fork.
+2. Push a commit, or open the **Actions** tab, pick the workflow and choose
+   **Run workflow**.
+3. Open the finished run and download the `firmware` artifact. It is a zip
+   containing `bb9900-zmk.uf2`.
+
+A build takes about four minutes.
+
+### Locally
+
+You need Python 3, `cmake`, `ninja` and `git`. These steps were run on Linux
+x86-64.
+
+```sh
+# 1. west, the Zephyr build tool. On Debian or Raspberry Pi OS, where pip
+#    refuses to install system-wide, do this in a virtual environment first:
+#    python3 -m venv ~/zmk-venv && . ~/zmk-venv/bin/activate
+pip install west
+
+# 2. this repo, then the firmware source it builds against
+git clone https://github.com/jhob101/fix9900.git
+cd fix9900
+west init -l config
+west update
+west zephyr-export
+pip install -r zephyr/scripts/requirements-base.txt
+
+# 3. the ARM toolchain (Zephyr SDK 0.16.8), unpacked to ~/zephyr-sdk-0.16.8
+cd ~
+wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.8/zephyr-sdk-0.16.8_linux-x86_64_minimal.tar.xz
+wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.8/toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz
+tar xf zephyr-sdk-0.16.8_linux-x86_64_minimal.tar.xz
+tar xf toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz -C zephyr-sdk-0.16.8
+
+# 4. build
+cd ~/fix9900
+west build -s zmk/app -d build -b bb9900 -- \
+  -DZMK_CONFIG="$(pwd)/config" \
+  -DZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.16.8"
+```
+
+The firmware is `build/zephyr/zmk.uf2`.
+
+Two things that are easy to get wrong:
+
+- Run `west init -l config` from the repo root. The `config` argument is the
+  folder inside the repo, not a name for the clone.
+- Pass `ZEPHYR_SDK_INSTALL_DIR` with `-D` after the `--`. Setting it as an
+  environment variable is ignored.
+
+After changing a `.conf` file or `west.yml`, add `-p always` to `west build`
+for a clean rebuild.
+
+## Flashing
+
+The keyboard stops working as a keyboard while it is in its bootloader, so you
+need another way to type on the uConsole. SSH from another computer is the
+easiest. A USB keyboard also works.
+
+1. **Copy the new `.uf2` to the uConsole**, for example with `scp`.
+
+2. **Put the keyboard into its bootloader.**
+   - On this firmware: Ctrl + Alt + `\`, or Fn + `\`.
+   - On the vendor's stock firmware: Fn + `\`.
+
+   A small USB drive labelled `ADM840BOOT` appears.
+
+3. **Find and mount the drive.**
+
+   ```sh
+   lsblk -o NAME,LABEL,SIZE        # look for ADM840BOOT, about 32M
+   sudo mount /dev/sda /mnt        # use the name lsblk showed
+   ```
+
+4. **The first time, back up what is on the keyboard now.**
+
+   ```sh
+   cp /mnt/CURRENT.UF2 ~/keyboard-backup.uf2
+   ```
+
+5. **Copy the new firmware onto the drive.**
+
+   ```sh
+   sudo cp bb9900-zmk.uf2 /mnt/ && sync
+   ```
+
+   The drive disappears by itself and the keyboard restarts on the new
+   firmware a second or two later.
+
+### Leaving the bootloader without flashing
+
+Copy any firmware `.uf2` onto the drive, including your backup. The keyboard
+restarts into whatever you copied.
+
+### If something goes wrong
+
+- **The keyboard does not come back.** The bootloader shortcuts are handled by
+  the keyboard itself, so try Ctrl + Alt + `\` again and copy your backup over.
+- **The drive reappears a few seconds after copying,** with USB errors in
+  `journalctl`. That is a stuck unmount, not a bad flash. Reboot the uConsole
+  and flash the same file again.
+
+## Desktop setup
+
+The firmware needs nothing installed on the uConsole. Two things are worth
+doing on the desktop side.
+
+### Remove keyd, if you used it
+
+If you ran keyd for one-shot modifiers or a kitty key with an earlier keyboard,
+stop it, or the two will stack:
+
+```sh
+sudo systemctl disable --now keyd
+```
+
+### Make the screen blank on lock
+
+Locking sends the screen lock key (`XF86ScreenSaver`). Nothing happens unless
+the desktop has a binding for it.
+
+On Raspberry Pi OS with labwc, where screen blanking runs through `swayidle`,
+add this inside `<keyboard>` in `~/.config/labwc/rc.xml`:
+
+```xml
+<keybind key="XF86ScreenSaver">
+  <action name="Execute" command="sh -c 'sleep 0.5; pkill -USR1 swayidle'" />
+</keybind>
+```
+
+Then reload labwc:
+
+```sh
+killall -s SIGHUP labwc
+```
+
+The short delay lets the key's own release pass first, so it does not count as
+activity and wake the screen straight away. On Raspberry Pi OS, `swayidle` is
+only running when screen blanking is switched on in the settings.
+
+## Customising
+
+| File | What it holds |
+| --- | --- |
+| [`config/bb9900.keymap`](config/bb9900.keymap) | Every key on every layer, with comments. Start here. |
+| [`config/bb9900.conf`](config/bb9900.conf) | Settings: pointer speed, backlight, gamepad, Bluetooth. |
+| [`config/bb9900.overlay`](config/bb9900.overlay) | The key matrix wiring. Leave it alone unless a key is dead. |
+| [`config/west.yml`](config/west.yml) | Which ZMK source to build against. |
+
+Common changes:
+
+- **Pointer speed:** `CONFIG_TRACKPAD_SPEEDMULTIPLIER_HORIZONTAL` and
+  `_VERTICAL` in `bb9900.conf`, in percent. Above about 133 the smallest
+  pointer step becomes two pixels.
+- **Scroll speed:** `CONFIG_TRACKPAD_SCROLL_INTERVAL` in `bb9900.conf`. Higher
+  is slower.
+- **One-shot timeout:** `release-after-ms` on `osm` and `osl` in the keymap.
+- **Kitty key list:** the `kitty_layer` block in the keymap.
+
+The files under `config/boards/bb9900/` are not used by the build. The board
+definition comes from the ZMK fork.
+
+Avoid ZMK's `combos` feature on this board: thoughtfix found that adding any
+combo stopped the Enter key working.
+
+To check what a key actually sends, on the uConsole:
+
+```sh
+sudo libinput debug-events --show-keycodes
+```
+
+## Known limitations
+
+- **Left Shift after Fn does nothing.** Press Shift before Fn, or use Right
+  Shift. This is inherited from the vendor keymap.
+- **Unlocking needs Fn released first.** Holding Fn and tapping Esc twice locks
+  but does not unlock.
+- **The gamepad is USB only**, and Bluetooth is off altogether.
+- **The D-pad pointer and the trackpad share one mouse report**, so using both
+  at once can feel uneven.
+- **Based on a December 2023 ZMK.** Current ZMK documentation and modules may
+  not apply.
+
+## Credits and licence
+
+- [ZMK](https://github.com/zmkfirmware/zmk), the firmware underneath.
+- [ZitaoTech](https://github.com/ZitaoTech/zmk), for the BB9900 keyboard and
+  trackpad support.
+- [Bill-lulu](https://github.com/Bill-lulu/uc9900), for the uConsole port.
+- [Daniel Gentleman (thoughtfix)](https://github.com/thoughtfix/fix9900), for
+  the fixes this fork starts from.
+- [j1n6's qmk-uconsole](https://github.com/j1n6/qmk-uconsole), whose gamepad
+  mode, Select scrolling and keyboard lock were the model for this one.
+
+MIT licensed, the same as upstream. See [`LICENSE.txt`](LICENSE.txt).
+
+The changes in this fork were written with the help of Claude (Anthropic).

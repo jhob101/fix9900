@@ -1,5 +1,18 @@
 # Development notes
 
+> **These are thoughtfix's notes from the original
+> [fix9900](https://github.com/thoughtfix/fix9900) work, kept for the reasoning
+> behind those fixes.** This fork has since changed some of what they describe:
+>
+> - Trackpad scroll mode is now hold-Select-to-scroll, not click-to-toggle, and
+>   the trackpad press is a left click again.
+> - The volume key behavior was reworked to cope with one-shot Shift.
+> - Bluetooth is switched off.
+> - The build instructions near the end are superseded by the
+>   [README](../README.md#building).
+>
+> For what the firmware does today, read the [README](../README.md).
+
 Notes from auditing and fixing `Bill-lulu/uc9900` (starting from `V1.2.1`) for the
 `hack2you` uConsole keyboard/trackpad mod. Organized into three kinds of entry:
 
