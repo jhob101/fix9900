@@ -107,8 +107,20 @@ Shift, Ctrl and Alt are plain modifiers here, not one-shot. Everything else
 (typing, the trackpad, the Fn keys) works as in keyboard mode.
 
 Games will see a new controller, so button mappings in SDL or RetroArch need
-setting once. `jstest /dev/input/js0` (from the `joystick` package) shows the
-axes and buttons live.
+setting once.
+
+To watch the axes and buttons live, use
+[sdl-jstest](https://github.com/Grumbel/sdl-jstest). It needs `cmake` and the
+SDL2 and ncurses development packages to build:
+
+```sh
+git clone https://github.com/Grumbel/sdl-jstest.git
+cd sdl-jstest && mkdir build && cd build
+cmake .. -DBUILD_SDL_JSTEST=OFF -DBUILD_SDL3_JSTEST=OFF   # SDL2 version only
+make
+./sdl2-jstest --list       # find the keyboard's joystick number
+./sdl2-jstest --test 0     # test joystick 0
+```
 
 ### Lock
 
