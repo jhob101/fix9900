@@ -129,12 +129,14 @@
             #binding-cells = <0>;
             bindings = <&kp K_SELECT>;
         };
-        // Same key in gamepad mode: still hold-to-scroll, but a tap is the
-        // joystick Select button.
+        // Same key in gamepad mode: the joystick Select button, down and up
+        // with the key so it responds on press and can be held (pass-through),
+        // and still hold-to-scroll.
         sel_scroll_pad: sel_scroll_pad {
             compatible = "zmk,behavior-scroll-hold";
             #binding-cells = <0>;
             bindings = <&jb JB_SELECT>;
+            pass-through;
         };
     };
 
