@@ -192,8 +192,8 @@ x86-64.
 pip install west
 
 # 2. this repo, then the firmware source it builds against
-git clone -b main https://github.com/jhob101/fix9900.git
-cd fix9900
+git clone -b main https://github.com/jhob101/uconsole-bb9900-keyboard.git
+cd uconsole-bb9900-keyboard
 west init -l config
 west update
 west zephyr-export
@@ -207,7 +207,7 @@ tar xf zephyr-sdk-0.16.8_linux-x86_64_minimal.tar.xz
 tar xf toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz -C zephyr-sdk-0.16.8
 
 # 4. build
-cd ~/fix9900
+cd ~/uconsole-bb9900-keyboard
 west build -s zmk/app -d build -b bb9900 -- \
   -DZMK_CONFIG="$(pwd)/config" \
   -DZEPHYR_SDK_INSTALL_DIR="$HOME/zephyr-sdk-0.16.8"
@@ -276,8 +276,8 @@ restarts into whatever you copied.
 
 ## Desktop setup
 
-The firmware needs nothing installed on the uConsole. Two things are worth
-doing on the desktop side.
+The firmware needs nothing installed on the uConsole. Two notes for the
+desktop side.
 
 ### Remove keyd, if you used it
 
@@ -288,29 +288,15 @@ stop it, or the two will stack:
 sudo systemctl disable --now keyd
 ```
 
-### Make the screen blank on lock
+### Screen blanking on lock
 
-Locking sends the screen lock key (`XF86ScreenSaver`). Nothing happens unless
-the desktop has a binding for it.
+Locking sends the screen lock key (`XF86ScreenSaver`). The firmware can do no
+more than that: whether the screen blanks is up to the desktop, and nothing
+happens unless it has a binding for that key.
 
-On Raspberry Pi OS with labwc, where screen blanking runs through `swayidle`,
-add this inside `<keyboard>` in `~/.config/labwc/rc.xml`:
-
-```xml
-<keybind key="XF86ScreenSaver">
-  <action name="Execute" command="sh -c 'sleep 0.5; pkill -USR1 swayidle'" />
-</keybind>
-```
-
-Then reload labwc:
-
-```sh
-killall -s SIGHUP labwc
-```
-
-The short delay lets the key's own release pass first, so it does not count as
-activity and wake the screen straight away. On Raspberry Pi OS, `swayidle` is
-only running when screen blanking is switched on in the settings.
+There is no known-good recipe here yet. On Raspberry Pi OS with labwc, binding
+the key to `pkill -USR1 swayidle` (which should start the idle blanking at
+once) did not blank the screen on the uConsole this was developed on.
 
 ## Customising
 
