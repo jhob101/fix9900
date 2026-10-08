@@ -1,0 +1,55 @@
+# Builds the firmware and publishes it as a GitHub Release whenever a version
+# tag is pushed, for example:
+#
+#   git tag v1.0.1
+#   git push origin v1.0.1
+#
+# The release gets bb9900-zmk.uf2 attached, so people can flash without
+# forking the repo or signing in to download a build artifact.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3.0
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download the built firmware
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware
+          path: firmware
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -l firmware
+          gh release create "$TAG" firmware/bb9900-zmk.uf2 \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "$TAG" \
+            --generate-notes \
+            --notes-file - <<'EOF'
+          Firmware for the hack2you uConsole trackpad keyboard.
+
+          Download `bb9900-zmk.uf2` below and follow the
+          [flashing instructions](https://github.com/${{ github.repository }}#flashing).
+          What every key does is in the
+          [README](https://github.com/${{ github.repository }}#what-it-does).
+
+          Back up the firmware you are running now before you flash
+          (copy `CURRENT.UF2` off the bootloader drive). This is a spare-time
+          project, tested on one keyboard: flash at your own risk.
+          EOF

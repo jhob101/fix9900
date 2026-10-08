@@ -194,8 +194,14 @@ Several of these needed changes to ZMK itself. Those live in
 
 ## Building
 
-The output of either route is one file, `bb9900-zmk.uf2` (GitHub) or `zmk.uf2`
-(local build).
+**You do not need to build anything to use the firmware.** Each
+[release](https://github.com/jhob101/uconsole-bb9900-keyboard/releases/latest)
+has a ready-made `bb9900-zmk.uf2` attached. Download it and go straight to
+[Flashing](#flashing).
+
+Build it yourself if you want to change the keymap or settings. The output of
+either route below is one file, `bb9900-zmk.uf2` (GitHub) or `zmk.uf2` (local
+build).
 
 ### On GitHub (no tools to install)
 
@@ -252,13 +258,27 @@ Two things that are easy to get wrong:
 After changing a `.conf` file or `west.yml`, add `-p always` to `west build`
 for a clean rebuild.
 
+### Publishing a release
+
+Pushing a version tag builds the firmware and publishes it as a GitHub Release
+with the `.uf2` attached:
+
+```sh
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+The release is built against whatever `jhob101/zmk` `main` is at that moment.
+
 ## Flashing
 
 The keyboard stops working as a keyboard while it is in its bootloader, so you
 need another way to type on the uConsole. SSH from another computer is the
 easiest. A USB keyboard also works.
 
-1. **Copy the new `.uf2` to the uConsole**, for example with `scp`.
+1. **Copy the new `.uf2` to the uConsole**, for example with `scp`. Get it
+   from the [latest release](https://github.com/jhob101/uconsole-bb9900-keyboard/releases/latest)
+   or from your own build.
 
 2. **Put the keyboard into its bootloader.**
    - On this firmware: hold Left Alt and Right Alt and press Start. If that
