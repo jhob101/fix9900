@@ -192,7 +192,7 @@ x86-64.
 pip install west
 
 # 2. this repo, then the firmware source it builds against
-git clone https://github.com/jhob101/fix9900.git
+git clone -b main https://github.com/jhob101/fix9900.git
 cd fix9900
 west init -l config
 west update
