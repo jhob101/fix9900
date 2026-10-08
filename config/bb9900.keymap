@@ -22,6 +22,10 @@
 #define KITTY 4
 // Held Y or B: the D-pad moves the pointer.
 #define MOUSE 5
+// Keyboard lock, toggled with Fn+Esc. LOCK swallows every key; UNLOCK is the
+// one-key layer the Fn keys reach while locked, holding only the way out.
+#define LOCK 6
+#define UNLOCK 7
 
 // Ctrl+Shift+<key>, the kitty_mod chord. Used throughout the KITTY layer.
 #define KM(k) &kp LC(LS(k))
@@ -181,7 +185,7 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
 &kp K_VOL_UP   &kp K_VOL_DN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&kp C_AL_SCREENSAVER  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
+&tog LOCK  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
 &none    &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
@@ -197,7 +201,7 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
 &kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&kp C_AL_SCREENSAVER  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
+&tog LOCK  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
 &none     &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
@@ -253,6 +257,42 @@ KM(UP)   KM(DOWN) KM(RIGHT)              &trans                          &trans 
             &mmv MOVE_LEFT                &trans            &trans     &trans    &trans
 &mmv MOVE_UP  &mmv MOVE_DOWN  &mmv MOVE_RIGHT  &trans                     &trans        &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+  &trans &trans &trans &trans &trans &trans &trans
+            >;
+        };
+
+
+        // Keyboard lock (Fn+Esc), as on the uConsole QMK firmware: every key
+        // and both mouse buttons are ignored until Fn+Esc is pressed again.
+        // The trackpad still moves the pointer. Being the highest layers, this
+        // holds in gamepad mode too. Not saved: a power cycle starts unlocked.
+        lock_layer {
+
+            bindings = <
+            &none                         &none             &none      &none     &none
+&none    &none    &none                   &none                           &none         &none
+&none &none &none &none &none &none &none &none &none &none
+&none &none &none &none &none &none &none &none &none &none &none &none
+&none &none &none &none &none &none &none &none &none &none &none
+&none &none &none &none &none &none &none &none &none &none &none &none
+&none &none &none &none &none &none &none &none &none &none &none
+  &mo UNLOCK &none &none &none &none &none &mo UNLOCK
+            >;
+        };
+
+
+        // Reached by holding either Fn while locked. Esc unlocks; everything
+        // else falls through to the lock layer and stays ignored.
+        unlock_layer {
+
+            bindings = <
+            &trans                        &trans            &trans     &trans    &trans
+&trans   &trans   &trans                  &trans                          &trans        &trans
+&tog LOCK &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
