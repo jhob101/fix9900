@@ -6,10 +6,12 @@ manifest:
       url-base: https://github.com/ZitaoTech
     - name: thoughtfix
       url-base: https://github.com/thoughtfix
+    - name: jhob101
+      url-base: https://github.com/jhob101
   projects:
     - name: zmk
-      remote: thoughtfix
-      revision: bbkeyboard_tp-fix9900
+      remote: jhob101
+      revision: uconsole-port
       import: app/west.yml
   self:
     path: config
