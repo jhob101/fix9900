@@ -80,7 +80,7 @@ Either Fn key works unless a row says otherwise.
 | Fn + H, Fn + J | Home, End |
 | Fn + I | Insert |
 | Fn + `,`, Fn + `.` | Screen brightness down, up |
-| Fn + Space | Key backlight on/off |
+| Fn + Space | Key backlight on/off. When on, it switches itself off after 30 seconds without a key press and comes back on the next one. |
 | Fn + Speaker | Mute |
 | Fn + Select | Print |
 | Fn + Start | Media pause |
@@ -128,16 +128,14 @@ Fn + Esc locks the keyboard, for carrying the uConsole around. Locking:
 
 1. switches the trackpad off,
 2. turns the key backlight off,
-3. sends the screen lock key, so the desktop can blank the screen (see
-   [Desktop setup](#desktop-setup)),
-4. ignores every key and both mouse buttons.
+3. ignores every key and both mouse buttons.
 
-Fn + Esc again unlocks: the trackpad comes back, the backlight returns to
-however it was, and the keyboard taps Shift so the desktop wakes the screen.
-Release Fn between locking and unlocking.
+Fn + Esc again unlocks: the trackpad comes back and the backlight returns to
+however it was. Release Fn between locking and unlocking.
 
-The lock is not remembered across a power cycle, so the keyboard always starts
-unlocked.
+The lock is inside the keyboard only. It sends nothing to the uConsole, so it
+does not blank the screen. It is not remembered across a power cycle, so the
+keyboard always starts unlocked.
 
 ### Bootloader
 
@@ -158,7 +156,7 @@ Added here:
 - **The kitty key** on A, and **one-shot modifiers**. These replace a
   [keyd](https://github.com/rvaiya/keyd) config on the uConsole.
 - **Y / B plus the D-pad as a mouse.**
-- **The keyboard lock** on Fn + Esc, including trackpad, backlight and screen.
+- **The keyboard lock** on Fn + Esc, covering the keys, trackpad and backlight.
 - **Bluetooth switched off.** The right Fn pairing keys (Esc, 1 to 4) now match
   left Fn.
 - **Trackpad pointer speed** raised by 30%.
@@ -288,8 +286,8 @@ restarts into whatever you copied.
 
 ## Desktop setup
 
-The firmware needs nothing installed on the uConsole. Two notes for the
-desktop side.
+The firmware needs nothing installed on the uConsole. One thing to undo if you
+are coming from an earlier setup:
 
 ### Remove keyd, if you used it
 
@@ -299,16 +297,6 @@ stop it, or the two will stack:
 ```sh
 sudo systemctl disable --now keyd
 ```
-
-### Screen blanking on lock
-
-Locking sends the screen lock key (`XF86ScreenSaver`). The firmware can do no
-more than that: whether the screen blanks is up to the desktop, and nothing
-happens unless it has a binding for that key.
-
-There is no known-good recipe here yet. On Raspberry Pi OS with labwc, binding
-the key to `pkill -USR1 swayidle` (which should start the idle blanking at
-once) did not blank the screen on the uConsole this was developed on.
 
 ## Customising
 
@@ -326,6 +314,8 @@ Common changes:
   pointer step becomes two pixels.
 - **Scroll speed:** `CONFIG_TRACKPAD_SCROLL_INTERVAL` in `bb9900.conf`. Higher
   is slower.
+- **Backlight auto-off delay:** `CONFIG_ZMK_IDLE_TIMEOUT` in `bb9900.conf`, in
+  milliseconds.
 - **One-shot timeout:** `release-after-ms` on `osm` and `osl` in the keymap.
 - **Kitty key list:** the `kitty_layer` block in the keymap.
 

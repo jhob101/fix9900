@@ -154,14 +154,12 @@
     };
 
     // Fn+Esc when unlocked (lock_kb): switch the trackpad off, hold the key
-    // backlight off, send the screen lock key, then lock the keyboard.
+    // backlight off, then lock the keyboard.
     // Fn+Esc again (unlock_kb, bound in unlock_layer): trackpad back on, the
-    // backlight back to whatever it was, unlock, then a tap of Left Shift.
-    // The Shift tap does nothing on its own; it is there so the host sees
-    // activity and wakes a blanked screen. The screen lock key is not sent a
-    // second time.
-    // The trackpad goes off first so a finger resting on it cannot wake the
-    // screen straight after the screen lock key.
+    // backlight back to whatever it was, and unlock.
+    // Nothing is sent to the host either way. An earlier version also sent
+    // the screen lock key, but no desktop binding for it proved reliable on
+    // the uConsole, so the lock leaves the screen alone.
     // tp_enable and BL_SUSPEND / BL_RESUME come from the ZMK fork. Neither is
     // saved, and suspend leaves the backlight's own on/off state untouched,
     // which is how the previous state comes back.
@@ -175,12 +173,12 @@
         lock_kb: lock_kb {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&macro_tap &tp_enable 0 &bl BL_SUSPEND &kp C_AL_SCREENSAVER &tog LOCK>;
+            bindings = <&macro_tap &tp_enable 0 &bl BL_SUSPEND &tog LOCK>;
         };
         unlock_kb: unlock_kb {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&macro_tap &tp_enable 1 &bl BL_RESUME &tog LOCK &kp LSHFT>;
+            bindings = <&macro_tap &tp_enable 1 &bl BL_RESUME &tog LOCK>;
         };
     };
 
@@ -299,9 +297,8 @@ KM(UP)   KM(DOWN) KM(RIGHT)              &trans                          &trans 
 
         // Keyboard lock (Fn+Esc), as on the uConsole QMK firmware: every key
         // and both mouse buttons are ignored until Fn+Esc is pressed again.
-        // Locking also switches the trackpad off, turns the key backlight off
-        // and sends the screen lock key; unlocking undoes the first two (see
-        // lock_kb / unlock_kb). Being the highest layers, this holds in
+        // Locking also switches the trackpad off and turns the key backlight
+        // off; unlocking undoes both (see lock_kb / unlock_kb). Being the highest layers, this holds in
         // gamepad mode too. Not saved: a power cycle starts unlocked.
         lock_layer {
 
