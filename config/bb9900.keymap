@@ -156,8 +156,10 @@
     // Fn+Esc when unlocked (lock_kb): switch the trackpad off, hold the key
     // backlight off, send the screen lock key, then lock the keyboard.
     // Fn+Esc again (unlock_kb, bound in unlock_layer): trackpad back on, the
-    // backlight back to whatever it was, and unlock. It does not send the
-    // screen lock key a second time.
+    // backlight back to whatever it was, unlock, then a tap of Left Shift.
+    // The Shift tap does nothing on its own; it is there so the host sees
+    // activity and wakes a blanked screen. The screen lock key is not sent a
+    // second time.
     // The trackpad goes off first so a finger resting on it cannot wake the
     // screen straight after the screen lock key.
     // tp_enable and BL_SUSPEND / BL_RESUME come from the ZMK fork. Neither is
@@ -178,7 +180,7 @@
         unlock_kb: unlock_kb {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&macro_tap &tp_enable 1 &bl BL_RESUME &tog LOCK>;
+            bindings = <&macro_tap &tp_enable 1 &bl BL_RESUME &tog LOCK &kp LSHFT>;
         };
     };
 
