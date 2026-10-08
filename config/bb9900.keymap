@@ -15,6 +15,13 @@
 
 #define SYM 1
 #define UPPER 2
+// GAME is reserved for gamepad mode and is all-transparent for now. It sits
+// at index 3 on purpose: the layer LED code in the ZMK fork blinks for layer 3.
+#define GAME 3
+#define KITTY 4
+
+// Ctrl+Shift+<key>, the kitty_mod chord. Used throughout the KITTY layer.
+#define KM(k) &kp LC(LS(k))
 
  
 
@@ -79,6 +86,30 @@
         };
     };
 
+    // One-shot modifiers and the one-shot KITTY layer. These replace the
+    // host-side keyd config (oneshot(shift), oneshot(control), oneshot(alt),
+    // oneshot(altgr) and oneshot(kittymod)). Tap = applies to the next key
+    // only; hold = behaves as a normal modifier / momentary layer.
+    // keyd has no one-shot timeout; ZMK requires one, so it is set long.
+    behaviors {
+        osm: oneshot_mod {
+            compatible = "zmk,behavior-sticky-key";
+            #binding-cells = <1>;
+            release-after-ms = <60000>;
+            bindings = <&kp>;
+            quick-release;
+            ignore-modifiers;
+        };
+        osl: oneshot_layer {
+            compatible = "zmk,behavior-sticky-key";
+            #binding-cells = <1>;
+            release-after-ms = <60000>;
+            bindings = <&mo>;
+            quick-release;
+            ignore-modifiers;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
@@ -95,13 +126,13 @@
 //        |  Fn  |  LCtrl  |  Alt   |      SPACE      |   Alt   |  RCtrl   |  Fn   |  
 //        -----------------------------------------------------------------------------------------------------------------
             &kp LEFT                      &mkp LCLK         &none      &kp F21   &kp F22
-&kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &kp  F23      &kp F24
-&kp ESC    &none  &kp C_PLAY &vol_shift    &kp LBKT   &kp RBKT   &kp FSLH   &kp MINUS  &kp  EQUAL &bootloader_morph
+&kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &kp  F23      &osl KITTY
+&kp ESC    &none  &kp LGUI &vol_shift    &kp LBKT   &kp RBKT   &kp FSLH   &kp MINUS  &kp  EQUAL &bootloader_morph
 &kp GRAVE  &kp N1        &kp N2     &kp N3   &kp N4     &kp N5     &kp N6     &kp N7     &kp N8    &kp N9  &kp N0 &kp BSPC
 &kp TAB     &kp Q         &kp W      &kp E    &kp R      &kp T      &kp Y      &kp U      &kp I     &kp O   &kp P
 &kp SQT     &kp A         &kp S      &kp D    &kp F      &kp G      &kp H      &kp J      &kp K     &kp L   &kp SEMICOLON &kp ENTER        
-&kp LSHFT   &kp Z         &kp X      &kp C    &kp V      &kp B      &kp N      &kp M      &kp COMMA &kp DOT &kp RSHFT
-  &mo SYM   &kp LCTRL               &kp LALT              &kp SPACE           &kp RALT         &kp RCTRL     &mo UPPER        
+&osm LSHFT  &kp Z         &kp X      &kp C    &kp V      &kp B      &kp N      &kp M      &kp COMMA &kp DOT &osm RSHFT
+  &mo SYM   &osm LCTRL              &osm LALT             &kp SPACE           &osm RALT        &osm RCTRL    &mo UPPER        
             >;
         };
 
@@ -134,6 +165,42 @@
 &none    &kp Z          &kp X         &kp C      &kp V      &kp B      &kp N      &kp M      &kp C_BRI_DN &kp C_BRI_UP &kp RSHFT
   &sys_reset  &kp LCTRL               &kp LALT             &bl BL_TOG           &kp RALT         &kp RCTRL     &none           
 
+            >;
+        };
+
+
+        // Gamepad mode. Not reachable yet: the buttons, D-pad axes and the
+        // Fn+G toggle arrive once the ZMK fork has joystick HID. For now it
+        // only carries the rule that modifiers are plain (not one-shot) here.
+        game_layer {
+
+            bindings = <
+            &trans                        &trans            &trans     &trans    &trans
+&trans   &trans   &trans                  &trans                          &trans        &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&kp LSHFT &trans &trans &trans &trans &trans &trans &trans &trans &trans &kp RSHFT
+  &trans &kp LCTRL &kp LALT &trans &kp RALT &kp RCTRL &trans
+            >;
+        };
+
+
+        // One-shot layer on the A button: Ctrl+Shift+<key> for the keys kitty
+        // uses, with 1-9 sending Ctrl+Shift+F1..F9. Anything not listed is
+        // transparent, so it types normally and ends the one-shot, as in keyd.
+        kitty_layer {
+
+            bindings = <
+            KM(LEFT)                      &trans            &trans     &trans    &trans
+KM(UP)   KM(DOWN) KM(RIGHT)              &trans                          &trans        &trans
+&trans     &trans     &trans     &trans     KM(LBKT)   KM(RBKT)   KM(FSLH)   KM(MINUS)  KM(EQUAL)  &trans
+&trans     KM(F1)     KM(F2)     KM(F3)     KM(F4)     KM(F5)     KM(F6)     KM(F7)     KM(F8)     KM(F9)     &trans     &trans
+&trans     KM(Q)      KM(W)      KM(E)      KM(R)      KM(T)      &trans     &trans     &trans     &trans     KM(P)
+&trans     &trans     KM(S)      &trans     KM(F)      KM(G)      KM(H)      KM(J)      KM(K)      KM(L)      &trans     KM(ENTER)
+&trans     &trans     KM(X)      KM(C)      KM(V)      KM(B)      KM(N)      KM(M)      KM(COMMA)  KM(DOT)    &trans
+  &trans   &trans                &trans                &trans              &trans           &trans        &trans
             >;
         };
 
