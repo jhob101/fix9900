@@ -153,14 +153,22 @@
         };
     };
 
-    // Fn+Esc when unlocked: send the screen lock key, then lock the keyboard.
-    // Unlocking (Fn+Esc again, bound in unlock_layer) only unlocks, so it does
-    // not send the screen lock key a second time.
+    // Fn+Esc when unlocked: send the screen lock key, hold the key backlight
+    // off, then lock the keyboard. Fn+Esc again (unlock_kb, bound in
+    // unlock_layer) lets the backlight go back to whatever it was and unlocks.
+    // It does not send the screen lock key a second time.
+    // BL_SUSPEND / BL_RESUME come from the ZMK fork: they leave the backlight's
+    // own on/off state untouched, which is how the previous state comes back.
     macros {
         lock_kb: lock_kb {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&macro_tap &kp C_AL_SCREENSAVER &tog LOCK>;
+            bindings = <&macro_tap &kp C_AL_SCREENSAVER &bl BL_SUSPEND &tog LOCK>;
+        };
+        unlock_kb: unlock_kb {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &bl BL_RESUME &tog LOCK>;
         };
     };
 
@@ -279,7 +287,8 @@ KM(UP)   KM(DOWN) KM(RIGHT)              &trans                          &trans 
 
         // Keyboard lock (Fn+Esc), as on the uConsole QMK firmware: every key
         // and both mouse buttons are ignored until Fn+Esc is pressed again.
-        // Locking also sends the screen lock key first (see lock_kb).
+        // Locking also sends the screen lock key and turns the key backlight
+        // off; unlocking restores the backlight (see lock_kb / unlock_kb).
         // The trackpad still moves the pointer. Being the highest layers, this
         // holds in gamepad mode too. Not saved: a power cycle starts unlocked.
         lock_layer {
@@ -304,7 +313,7 @@ KM(UP)   KM(DOWN) KM(RIGHT)              &trans                          &trans 
             bindings = <
             &trans                        &trans            &trans     &trans    &trans
 &trans   &trans   &trans                  &trans                          &trans        &trans
-&tog LOCK &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&unlock_kb &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
