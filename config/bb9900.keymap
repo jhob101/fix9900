@@ -66,8 +66,8 @@
     //   bootloader_alt:   no Left Alt  -> plain \ (so Ctrl+\ is just Ctrl+\)
     //                     Left Alt     -> &bootloader
     //
-    // The same binding sits on \ in both Fn layers, replacing the bare Fn+\
-    // bootloader key the vendor keymap had there, which was too easy to hit.
+    // The same binding sits on the \ key in both Fn layers. It replaces the
+    // vendor keymap's bare Fn+\ bootloader key, which was too easy to hit.
     //
     // This is a mod-morph rather than a ZMK `combos` block because thoughtfix
     // found that any combos block on this board stopped the Enter key working.
