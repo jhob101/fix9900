@@ -89,7 +89,8 @@ Either Fn key works unless a row says otherwise.
 | Left Fn + D-pad up / down | Volume up / down |
 | Left Fn + Left Alt | Super |
 | Right Fn, then Left Fn | Restart the keyboard firmware |
-| Left Fn, then Right Fn, then `\` | Enter the [bootloader](#bootloader) |
+| Left Alt + Right Alt + Start | Enter the [bootloader](#bootloader) (no Fn needed) |
+| Hold Left Fn, then also Right Fn, then press `\` | Enter the bootloader, fallback route |
 
 ### Gamepad mode
 
@@ -142,11 +143,18 @@ keyboard always starts unlocked.
 Two shortcuts restart the keyboard into its bootloader for
 [flashing](#flashing):
 
-- **Left Ctrl + Left Alt + `\`**, with both modifiers held down.
-- **Left Fn, then Right Fn, then `\`**, as a fallback.
+- **Left Alt + Right Alt + Start**, the same shortcut as the qmk-uconsole
+  firmware. Hold both Alt keys and press Start.
+- **Left Fn + Right Fn + `\`**, as a fallback. Hold Left Fn, then also hold
+  Right Fn, then press `\`. The order matters: Right Fn first restarts the
+  firmware instead.
 
-Neither works while the keyboard is locked. Ctrl + `\`, Alt + `\` and
-Fn + `\` on their own are ordinary keys.
+Neither works while the keyboard is locked, and the first does not work in
+gamepad mode, where Start is a joystick button.
+
+Because the Alt keys are [one-shot](#one-shot-modifiers), tapping both and then
+pressing Start also counts. The Fn route cannot be set off that way, as Fn keys
+are never one-shot.
 
 ## Changes in this fork
 
@@ -168,8 +176,9 @@ Added here:
 - **Trackpad pointer speed** raised by 30%.
 - **Volume key fix**: Shift + Speaker no longer leaves Shift stuck on.
 - **Bootloader shortcuts made safe.** In fix9900, Ctrl + `\` or Alt + `\`
-  alone entered the bootloader, as did Fn + `\`. It now takes Ctrl and Alt
-  together, or the two Fn keys in order.
+  alone entered the bootloader, as did Fn + `\`. The backslash key is now
+  just a backslash, and the shortcuts are Left Alt + Right Alt + Start or
+  both Fn keys with `\`.
 
 Kept from thoughtfix's fix9900:
 
@@ -252,8 +261,8 @@ easiest. A USB keyboard also works.
 1. **Copy the new `.uf2` to the uConsole**, for example with `scp`.
 
 2. **Put the keyboard into its bootloader.**
-   - On this firmware: Left Ctrl + Left Alt + `\`. If that ever fails, hold
-     Left Fn, then Right Fn, then press `\`.
+   - On this firmware: hold Left Alt and Right Alt and press Start. If that
+     ever fails, hold Left Fn, then also Right Fn, then press `\`.
    - On the vendor's stock firmware: Fn + `\`.
 
    A small USB drive labelled `ADM840BOOT` appears.
@@ -288,8 +297,8 @@ restarts into whatever you copied.
 ### If something goes wrong
 
 - **The keyboard does not come back.** The bootloader shortcuts are handled by
-  the keyboard itself, so try Ctrl + Alt + `\` again (or Left Fn, Right Fn,
-  `\`) and copy your backup over.
+  the keyboard itself, so try Left Alt + Right Alt + Start again (or Left Fn,
+  Right Fn, `\`) and copy your backup over.
 - **The drive reappears a few seconds after copying,** with USB errors in
   `journalctl`. That is a stuck unmount, not a bad flash. Reboot the uConsole
   and flash the same file again.
