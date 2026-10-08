@@ -153,6 +153,17 @@
         };
     };
 
+    // Fn+Esc when unlocked: send the screen lock key, then lock the keyboard.
+    // Unlocking (Fn+Esc again, bound in unlock_layer) only unlocks, so it does
+    // not send the screen lock key a second time.
+    macros {
+        lock_kb: lock_kb {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &kp C_AL_SCREENSAVER &tog LOCK>;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
@@ -185,7 +196,7 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
 &kp K_VOL_UP   &kp K_VOL_DN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&tog LOCK  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
+&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
 &none    &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
@@ -201,7 +212,7 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
 &kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&tog LOCK  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
+&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
 &none     &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
@@ -268,6 +279,7 @@ KM(UP)   KM(DOWN) KM(RIGHT)              &trans                          &trans 
 
         // Keyboard lock (Fn+Esc), as on the uConsole QMK firmware: every key
         // and both mouse buttons are ignored until Fn+Esc is pressed again.
+        // Locking also sends the screen lock key first (see lock_kb).
         // The trackpad still moves the pointer. Being the highest layers, this
         // holds in gamepad mode too. Not saved: a power cycle starts unlocked.
         lock_layer {
