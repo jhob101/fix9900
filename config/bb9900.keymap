@@ -12,16 +12,25 @@
 #include <dt-bindings/zmk/backlight.h>
 #include <dt-bindings/zmk/ext_power.h>
 #include <dt-bindings/zmk/modifiers.h>
+#include <dt-bindings/zmk/joystick.h>
 
 #define SYM 1
 #define UPPER 2
-// GAME is reserved for gamepad mode and is all-transparent for now. It sits
-// at index 3 on purpose: the layer LED code in the ZMK fork blinks for layer 3.
+// GAME is gamepad mode, toggled with Fn+G. It sits at index 3 on purpose:
+// the layer LED code in the ZMK fork blinks for layer 3.
 #define GAME 3
 #define KITTY 4
 
 // Ctrl+Shift+<key>, the kitty_mod chord. Used throughout the KITTY layer.
 #define KM(k) &kp LC(LS(k))
+
+// Joystick button numbers in gamepad mode, as on the uConsole QMK firmware.
+#define JB_A 0
+#define JB_B 1
+#define JB_X 2
+#define JB_Y 3
+#define JB_SELECT 4
+#define JB_START 5
 
  
 
@@ -120,6 +129,13 @@
             #binding-cells = <0>;
             bindings = <&kp K_SELECT>;
         };
+        // Same key in gamepad mode: still hold-to-scroll, but a tap is the
+        // joystick Select button.
+        sel_scroll_pad: sel_scroll_pad {
+            compatible = "zmk,behavior-scroll-hold";
+            #binding-cells = <0>;
+            bindings = <&jb JB_SELECT>;
+        };
     };
 
     keymap {
@@ -157,7 +173,7 @@
 &kp C_AL_SCREENSAVER  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
 &none    &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
-&none    &kp A          &kp S         &kp D      &kp F      &kp G      &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
+&none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
 &none    &kp Z          &kp X         &kp C      &kp V      &kp B      &kp N      &kp M      &kp C_BRI_DN &kp C_BRI_UP &kp RSHFT
   &none  &kp LCTRL               &kp LGUI             &bl BL_TOG           &kp RALT         &kp RCTRL     &mo UPPER
 
@@ -173,7 +189,7 @@
 &bt BT_CLR  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
 &none     &bt BT_SEL 0          &bt BT_SEL 1         &bt BT_SEL 2      &bt BT_SEL 3     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
-&none    &kp A          &kp S         &kp D      &kp F      &kp G      &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
+&none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
 &none    &kp Z          &kp X         &kp C      &kp V      &kp B      &kp N      &kp M      &kp C_BRI_DN &kp C_BRI_UP &kp RSHFT
   &sys_reset  &kp LCTRL               &kp LALT             &bl BL_TOG           &kp RALT         &kp RCTRL     &none           
 
@@ -181,15 +197,17 @@
         };
 
 
-        // Gamepad mode. Not reachable yet: the buttons, D-pad axes and the
-        // Fn+G toggle arrive once the ZMK fork has joystick HID. For now it
-        // only carries the rule that modifiers are plain (not one-shot) here.
+        // Gamepad mode, toggled with Fn+G. The D-pad drives the joystick X/Y
+        // axes, A/B/X/Y/Select/Start are joystick buttons 1-6, and modifiers
+        // are plain (not one-shot). Everything else falls through, so the
+        // rest of the keyboard, the trackpad and the Fn layers still work.
+        // Needs CONFIG_ZMK_JOYSTICK=y (bb9900.conf).
         game_layer {
 
             bindings = <
-            &trans                        &trans            &trans     &trans    &trans
-&trans   &trans   &trans                  &trans                          &trans        &trans
-&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+            &jd JD_LEFT                   &trans            &trans     &jb JB_Y  &jb JB_X
+&jd JD_UP  &jd JD_DOWN  &jd JD_RIGHT      &trans                          &jb JB_B      &jb JB_A
+&trans &sel_scroll_pad &jb JB_START &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
