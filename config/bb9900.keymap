@@ -26,6 +26,9 @@
 // one-key layer the Fn keys reach while locked, holding only the way out.
 #define LOCK 6
 #define UNLOCK 7
+// Second way into the bootloader, kept as a fallback that relies on nothing
+// but plain layers: hold Left Fn, then Right Fn, then press \.
+#define BOOT 8
 
 // Ctrl+Shift+<key>, the kitty_mod chord. Used throughout the KITTY layer.
 #define KM(k) &kp LC(LS(k))
@@ -51,30 +54,36 @@
         };
     };
 
-    // Bootloader-combo hardening (see NOTES.md, "flash mode" combo and the
-    // Enter key bugfix). Adds Left-Ctrl+Left-Alt+\ as a NEW, additional way
-    // into the bootloader, alongside the existing bare Fn+\ binding in
-    // sym_layer/upper_layer below (left untouched on purpose. TODO: check
-    // with the kb maker before ever removing it, other users may already
-    // rely on the documented Fn+\).
+    // Bootloader shortcut: Left Ctrl + Left Alt + \, with BOTH modifiers held.
     //
-    // Originally implemented as a ZMK `combos` block, which turned out to
-    // silently break the Enter key (confirmed via bisection across several
-    // builds: Enter worked with zero changes, broke the moment any combos
-    // block existed, regardless of which keys it referenced). Root cause
-    // not fully proven, but not worth re-attempting: this mod-morph
-    // approach sidesteps the combo subsystem entirely. Bound directly to
-    // the Backslash position instead: normal \ press behaves exactly as
-    // before, but pressing it while Ctrl+Alt are held sends &bootloader.
-    // Same gesture for the user, a much simpler mechanism under the hood:
-    // a per-position modifier check at press time, not global multi-key
-    // position tracking with timeouts.
+    // A ZMK mod-morph fires when ANY of its listed modifiers is held, not all
+    // of them. The original single morph listed Ctrl and Alt together, so
+    // Ctrl+\ or Alt+\ alone dropped the keyboard into the bootloader. Two
+    // morphs nested, one modifier each, give a real AND:
+    //
+    //   bootloader_morph: no Left Ctrl -> plain \ (so Alt+\ is just Alt+\)
+    //                     Left Ctrl    -> bootloader_alt, with Ctrl left in place
+    //   bootloader_alt:   no Left Alt  -> plain \ (so Ctrl+\ is just Ctrl+\)
+    //                     Left Alt     -> &bootloader
+    //
+    // The same binding sits on \ in both Fn layers, replacing the bare Fn+\
+    // bootloader key the vendor keymap had there, which was too easy to hit.
+    //
+    // This is a mod-morph rather than a ZMK `combos` block because thoughtfix
+    // found that any combos block on this board stopped the Enter key working.
     behaviors {
-        bootloader_morph: bootloader_morph {
+        bootloader_alt: bootloader_alt {
             compatible = "zmk,behavior-mod-morph";
             #binding-cells = <0>;
             bindings = <&kp BACKSLASH>, <&bootloader>;
-            mods = <(MOD_LCTL|MOD_LALT)>;
+            mods = <(MOD_LALT)>;
+        };
+        bootloader_morph: bootloader_morph {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp BACKSLASH>, <&bootloader_alt>;
+            mods = <(MOD_LCTL)>;
+            keep-mods = <(MOD_LCTL)>;
         };
     };
 
@@ -214,12 +223,12 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
 &kp K_VOL_UP   &kp K_VOL_DN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
+&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader_morph
 &none    &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
 &none    &kp Z          &kp X         &kp C      &kp V      &kp B      &kp N      &kp M      &kp C_BRI_DN &kp C_BRI_UP &kp RSHFT
-  &none  &kp LCTRL               &kp LGUI             &bl BL_TOG           &kp RALT         &kp RCTRL     &mo UPPER
+  &none  &kp LCTRL               &kp LGUI             &bl BL_TOG           &kp RALT         &kp RCTRL     &mo BOOT
 
             >;
         };
@@ -230,7 +239,7 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
 &kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader
+&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &bootloader_morph
 &none     &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
@@ -323,6 +332,26 @@ KM(UP)   KM(DOWN) KM(RIGHT)              &trans                          &trans 
             &trans                        &trans            &trans     &trans    &trans
 &trans   &trans   &trans                  &trans                          &trans        &trans
 &unlock_kb &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
+  &trans &trans &trans &trans &trans &trans &trans
+            >;
+        };
+
+
+        // Left Fn held, then Right Fn: this layer sits on top of the left Fn
+        // layer and adds one key, \ = bootloader. It is a deliberate
+        // three-key, two-handed sequence, and it does not depend on the
+        // Ctrl+Alt morph above, so there is always a second way to flash.
+        // Not reachable while the keyboard is locked.
+        boot_layer {
+
+            bindings = <
+            &trans                        &trans            &trans     &trans    &trans
+&trans   &trans   &trans                  &trans                          &trans        &trans
+&trans &trans &trans &trans &trans &trans &trans &trans &trans &bootloader
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans

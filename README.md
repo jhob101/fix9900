@@ -86,10 +86,10 @@ Either Fn key works unless a row says otherwise.
 | Fn + Start | Media pause |
 | Fn + G | [Gamepad mode](#gamepad-mode) on/off |
 | Fn + Esc | [Lock](#lock) / unlock |
-| Fn + `\` | Enter the bootloader, for flashing |
 | Left Fn + D-pad up / down | Volume up / down |
 | Left Fn + Left Alt | Super |
 | Right Fn, then Left Fn | Restart the keyboard firmware |
+| Left Fn, then Right Fn, then `\` | Enter the [bootloader](#bootloader) |
 
 ### Gamepad mode
 
@@ -139,8 +139,14 @@ keyboard always starts unlocked.
 
 ### Bootloader
 
-Ctrl + Alt + `\` or Fn + `\` restarts the keyboard into its bootloader for
-[flashing](#flashing). Neither works while the keyboard is locked.
+Two shortcuts restart the keyboard into its bootloader for
+[flashing](#flashing):
+
+- **Left Ctrl + Left Alt + `\`**, with both modifiers held down.
+- **Left Fn, then Right Fn, then `\`**, as a fallback.
+
+Neither works while the keyboard is locked. Ctrl + `\`, Alt + `\` and
+Fn + `\` on their own are ordinary keys.
 
 ## Changes in this fork
 
@@ -161,13 +167,15 @@ Added here:
   left Fn.
 - **Trackpad pointer speed** raised by 30%.
 - **Volume key fix**: Shift + Speaker no longer leaves Shift stuck on.
+- **Bootloader shortcuts made safe.** In fix9900, Ctrl + `\` or Alt + `\`
+  alone entered the bootloader, as did Fn + `\`. It now takes Ctrl and Alt
+  together, or the two Fn keys in order.
 
 Kept from thoughtfix's fix9900:
 
 - Speaker key as volume down, Shift for up, Fn for mute.
 - Caps Lock no longer interferes with the trackpad.
 - Working Enter key, right Alt and right Ctrl under Fn, and Fn + Start.
-- Ctrl + Alt + `\` as a second, harder to hit by accident, way into the bootloader.
 - Smoother trackpad scrolling, locked to one axis at a time.
 
 thoughtfix's notes on those fixes are in [`config/NOTES.md`](config/NOTES.md).
@@ -244,7 +252,8 @@ easiest. A USB keyboard also works.
 1. **Copy the new `.uf2` to the uConsole**, for example with `scp`.
 
 2. **Put the keyboard into its bootloader.**
-   - On this firmware: Ctrl + Alt + `\`, or Fn + `\`.
+   - On this firmware: Left Ctrl + Left Alt + `\`. If that ever fails, hold
+     Left Fn, then Right Fn, then press `\`.
    - On the vendor's stock firmware: Fn + `\`.
 
    A small USB drive labelled `ADM840BOOT` appears.
@@ -279,7 +288,8 @@ restarts into whatever you copied.
 ### If something goes wrong
 
 - **The keyboard does not come back.** The bootloader shortcuts are handled by
-  the keyboard itself, so try Ctrl + Alt + `\` again and copy your backup over.
+  the keyboard itself, so try Ctrl + Alt + `\` again (or Left Fn, Right Fn,
+  `\`) and copy your backup over.
 - **The drive reappears a few seconds after copying,** with USB errors in
   `journalctl`. That is a stuck unmount, not a bad flash. Reboot the uConsole
   and flash the same file again.

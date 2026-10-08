@@ -8,6 +8,9 @@
 >   the trackpad press is a left click again.
 > - The volume key behavior was reworked to cope with one-shot Shift.
 > - Bluetooth is switched off.
+> - The bootloader shortcuts changed: Fn+\\ alone no longer enters the
+>   bootloader, and Ctrl+Alt+\\ now needs both modifiers (the single mod-morph
+>   described below fired on either one).
 > - The build instructions near the end are superseded by the
 >   [README](../README.md#building).
 >
