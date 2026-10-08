@@ -260,13 +260,10 @@ for a clean rebuild.
 
 ### Publishing a release
 
-Pushing a version tag builds the firmware and publishes it as a GitHub Release
-with the `.uf2` attached:
-
-```sh
-git tag v1.0.1
-git push origin v1.0.1
-```
+Change the number in the [`VERSION`](VERSION) file on `main`, for example from
+`1.0.0` to `1.0.1`. You can edit it straight on GitHub. That builds the
+firmware and publishes a GitHub Release named `v1.0.1` with the `.uf2`
+attached.
 
 The release is built against whatever `jhob101/zmk` `main` is at that moment.
 

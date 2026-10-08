@@ -1,17 +1,18 @@
-# Builds the firmware and publishes it as a GitHub Release whenever a version
-# tag is pushed, for example:
+# Publishes a GitHub Release with the firmware attached.
 #
-#   git tag v1.0.1
-#   git push origin v1.0.1
-#
-# The release gets bb9900-zmk.uf2 attached, so people can flash without
-# forking the repo or signing in to download a build artifact.
+# To make a release, change the version number in the VERSION file on main
+# (edit it on GitHub or push a commit). This workflow then builds the firmware
+# and creates the release and its tag, v<version>, with bb9900-zmk.uf2 attached,
+# so people can flash without forking the repo or signing in to download a
+# build artifact.
 name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+    paths:
+      - VERSION
 
 jobs:
   build:
@@ -24,6 +25,18 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Read the version
+        run: |
+          version="$(tr -d '[:space:]' < VERSION)"
+          if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::VERSION must look like 1.2.3, got '$version'"
+            exit 1
+          fi
+          echo "TAG=v$version" >> "$GITHUB_ENV"
+
       - name: Download the built firmware
         uses: actions/download-artifact@v4
         with:
@@ -33,12 +46,14 @@ jobs:
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: |
           ls -l firmware
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::Release $TAG already exists. Raise the number in VERSION."
+            exit 1
+          fi
           gh release create "$TAG" firmware/bb9900-zmk.uf2 \
-            --repo "$GITHUB_REPOSITORY" \
-            --verify-tag \
+            --target "$GITHUB_SHA" \
             --title "$TAG" \
             --generate-notes \
             --notes-file - <<'EOF'
