@@ -5,6 +5,10 @@
 # and creates the release and its tag, v<version>, with bb9900-zmk.uf2 attached,
 # so people can flash without forking the repo or signing in to download a
 # build artifact.
+#
+# The text on the release page comes from .github/release-notes.md. Changing
+# that file without changing VERSION updates the text of the current release
+# and leaves its firmware file alone.
 name: Release
 
 on:
@@ -13,58 +17,78 @@ on:
       - main
     paths:
       - VERSION
+      - .github/release-notes.md
 
 jobs:
-  build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3.0
-
-  release:
-    name: Publish release
-    needs: build
+  check:
+    name: Check version
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      exists: ${{ steps.version.outputs.exists }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Read the version
+      - name: Read the version and look for its release
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           version="$(tr -d '[:space:]' < VERSION)"
           if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "::error::VERSION must look like 1.2.3, got '$version'"
             exit 1
           fi
-          echo "TAG=v$version" >> "$GITHUB_ENV"
+          tag="v$version"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release $tag exists: only its text will be updated."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Release $tag does not exist yet: building and publishing it."
+          fi
+
+  # Only a new version needs a build. Updating the text of an existing
+  # release must not replace the firmware people may already have downloaded.
+  build:
+    needs: check
+    if: needs.check.outputs.exists == 'false'
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3.0
+
+  release:
+    name: Publish release
+    needs: [check, build]
+    if: ${{ !cancelled() && needs.check.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ needs.check.outputs.tag }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Update the text of the existing release
+        if: needs.check.outputs.exists == 'true'
+        run: gh release edit "$TAG" --notes-file .github/release-notes.md
 
       - name: Download the built firmware
+        if: needs.check.outputs.exists == 'false'
         uses: actions/download-artifact@v4
         with:
           name: firmware
           path: firmware
 
       - name: Create the release
-        env:
-          GH_TOKEN: ${{ github.token }}
+        if: needs.check.outputs.exists == 'false'
         run: |
           ls -l firmware
-          if gh release view "$TAG" > /dev/null 2>&1; then
-            echo "::error::Release $TAG already exists. Raise the number in VERSION."
-            exit 1
-          fi
           gh release create "$TAG" firmware/bb9900-zmk.uf2 \
             --target "$GITHUB_SHA" \
             --title "$TAG" \
-            --generate-notes \
-            --notes-file - <<'EOF'
-          Firmware for the hack2you uConsole trackpad keyboard.
-
-          Download `bb9900-zmk.uf2` below and follow the
-          [flashing instructions](https://github.com/${{ github.repository }}#flashing).
-          What every key does is in the
-          [README](https://github.com/${{ github.repository }}#what-it-does).
-
-          Back up the firmware you are running now before you flash
-          (copy `CURRENT.UF2` off the bootloader drive). This is a spare-time
-          project, tested on one keyboard: flash at your own risk.
-          EOF
+            --notes-file .github/release-notes.md

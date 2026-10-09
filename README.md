@@ -4,14 +4,17 @@ Custom firmware for the [hack2you uConsole trackpad keyboard kit](https://hack2y
 the replacement uConsole keyboard with an optical trackpad in place of the
 trackball.
 
+**It is for the V2.1 keyboard.** It may work on other versions of the
+keyboard, but it has only been tested on V2.1.
+
 It carries over the features of the [qmk-uconsole](https://github.com/jhob101/qmk-uconsole)
 firmware for the original keyboard (gamepad mode, hold-Select scrolling, the
 keyboard lock) and adds a few of its own, all inside the firmware. Nothing
 needs to run on the uConsole itself: no keyd, no remapping daemon.
 
 > **Flash at your own risk.** This is a spare-time project, developed and tested
-> on one keyboard. Keep a copy of the firmware you are running now before you
-> flash anything (see [Flashing](#flashing)).
+> on one V2.1 keyboard. Keep a copy of the firmware you are running now before
+> you flash anything (see [Flashing](#flashing)).
 
 ## Contents
 
@@ -267,6 +270,11 @@ attached.
 
 The release is built against whatever `jhob101/zmk` `main` is at that moment.
 
+The text on the release page comes from
+[`.github/release-notes.md`](.github/release-notes.md). Editing that file on
+its own updates the text of the current release without touching its firmware
+file.
+
 ## Flashing
 
 The keyboard stops working as a keyboard while it is in its bootloader, so you
@@ -369,6 +377,8 @@ sudo libinput debug-events --show-keycodes
 
 ## Known limitations
 
+- **Only tested on the V2.1 keyboard.** Other versions of the kit may work but
+  are untried.
 - **Left Shift after Fn does nothing.** Press Shift before Fn, or use Right
   Shift. This is inherited from the vendor keymap.
 - **Unlocking needs Fn released first.** Holding Fn and tapping Esc twice locks
