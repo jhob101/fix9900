@@ -12,4 +12,9 @@
 #     shield: reviung41
 ---
 include:
+  # Standard firmware: pressing the trackpad is a left click.
   - board: bb9900
+  # Same firmware, but pressing the trackpad is a middle click.
+  - board: bb9900
+    cmake-args: -DDTS_EXTRA_CPPFLAGS=-DTRACKPAD_PRESS=MCLK
+    artifact-name: bb9900-zmk-middle-click

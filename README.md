@@ -38,7 +38,7 @@ This is the normal mode. Letters, numbers and punctuation are as printed.
 
 | Control | What it does |
 | --- | --- |
-| Trackpad | Moves the pointer. Pressing it is a left click. |
+| Trackpad | Moves the pointer. Pressing it is a left click, or a middle click in the [middle-click firmware](#which-file). |
 | L / R buttons | Left click / right click. |
 | D-pad | Arrow keys. |
 | Select | Hold it and move the trackpad to scroll. A tap on its own sends the Select key (`KEY_FRONT` on Linux). |
@@ -199,8 +199,19 @@ Several of these needed changes to ZMK itself. Those live in
 
 **You do not need to build anything to use the firmware.** Each
 [release](https://github.com/jhob101/uconsole-bb9900-keyboard/releases/latest)
-has a ready-made `bb9900-zmk.uf2` attached. Download it and go straight to
+has ready-made firmware attached. Download the file you want and go straight to
 [Flashing](#flashing).
+
+### Which file
+
+The two files differ only in what pressing the trackpad does:
+
+| File | Pressing the trackpad |
+| --- | --- |
+| `bb9900-zmk.uf2` | Left click |
+| `bb9900-zmk-middle-click.uf2` | Middle click |
+
+The L and R buttons are left and right click in both.
 
 Build it yourself if you want to change the keymap or settings. The output of
 either route below is one file, `bb9900-zmk.uf2` (GitHub) or `zmk.uf2` (local
@@ -212,7 +223,7 @@ build).
 2. Push a commit, or open the **Actions** tab, pick the workflow and choose
    **Run workflow**.
 3. Open the finished run and download the `firmware` artifact. It is a zip
-   containing `bb9900-zmk.uf2`.
+   containing both files from the [table above](#which-file).
 
 A build takes about four minutes.
 
@@ -311,6 +322,8 @@ easiest. A USB keyboard also works.
    sudo cp bb9900-zmk.uf2 /mnt/ && sync
    ```
 
+   Use `bb9900-zmk-middle-click.uf2` here if that is the one you chose.
+
    The drive disappears by itself and the keyboard restarts on the new
    firmware a second or two later.
 
@@ -353,6 +366,10 @@ sudo systemctl disable --now keyd
 
 Common changes:
 
+- **Trackpad press:** `TRACKPAD_PRESS` near the top of the keymap: `LCLK`,
+  `MCLK` or `RCLK`. The middle-click firmware is the same keymap with this set
+  to `MCLK` from [`build.yaml`](build.yaml), which is also where to add
+  another variant.
 - **Pointer speed:** `CONFIG_TRACKPAD_SPEEDMULTIPLIER_HORIZONTAL` and
   `_VERTICAL` in `bb9900.conf`, in percent. Above about 133 the smallest
   pointer step becomes two pixels.

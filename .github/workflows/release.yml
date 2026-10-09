@@ -2,9 +2,9 @@
 #
 # To make a release, change the version number in the VERSION file on main
 # (edit it on GitHub or push a commit). This workflow then builds the firmware
-# and creates the release and its tag, v<version>, with bb9900-zmk.uf2 attached,
-# so people can flash without forking the repo or signing in to download a
-# build artifact.
+# and creates the release and its tag, v<version>, with every .uf2 from
+# build.yaml attached, so people can flash without forking the repo or signing
+# in to download a build artifact.
 #
 # The text on the release page comes from .github/release-notes.md. Changing
 # that file without changing VERSION updates the text of the current release
@@ -88,7 +88,7 @@ jobs:
         if: needs.check.outputs.exists == 'false'
         run: |
           ls -l firmware
-          gh release create "$TAG" firmware/bb9900-zmk.uf2 \
+          gh release create "$TAG" firmware/*.uf2 \
             --target "$GITHUB_SHA" \
             --title "$TAG" \
             --notes-file .github/release-notes.md

@@ -30,6 +30,14 @@
 // plain layers: hold Left Fn, then also hold Right Fn, then press the \ key.
 #define BOOT 8
 
+// What pressing the trackpad does: a mouse button, LCLK (left), MCLK
+// (middle) or RCLK (right). Left click unless the build says otherwise. The
+// middle-click firmware in build.yaml sets this from the command line, so
+// leave the #ifndef in place.
+#ifndef TRACKPAD_PRESS
+#define TRACKPAD_PRESS LCLK
+#endif
+
 // Ctrl+Shift+<key>, the kitty_mod chord. Used throughout the KITTY layer.
 #define KM(k) &kp LC(LS(k))
 
@@ -211,7 +219,7 @@
 // |  LShift  |  Z  |  X  |  C  |  V  |  B  |  N  |  M  |  <  |  >  |  ;  |  RShift  |  
 //        |  Fn  |  LCtrl  |  Alt   |      SPACE      |   Alt   |  RCtrl   |  Fn   |  
 //        -----------------------------------------------------------------------------------------------------------------
-            &kp LEFT                      &mkp LCLK         &mkp LCLK  &dpad_mouse MOUSE F21   &kp F22
+            &kp LEFT                      &mkp LCLK         &mkp TRACKPAD_PRESS  &dpad_mouse MOUSE F21   &kp F22
 &kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &dpad_mouse MOUSE F23      &osl KITTY
 &kp ESC    &sel_scroll  &start_key &vol_shift    &kp LBKT   &kp RBKT   &kp FSLH   &kp MINUS  &kp  EQUAL &kp BACKSLASH
 &kp GRAVE  &kp N1        &kp N2     &kp N3   &kp N4     &kp N5     &kp N6     &kp N7     &kp N8    &kp N9  &kp N0 &kp BSPC
@@ -226,7 +234,7 @@
         sym_layer {
 
             bindings = <
-        &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
+        &kp LEFT                      &mkp LCLK         &mkp TRACKPAD_PRESS  &kp Y   &kp X
 &kp K_VOL_UP   &kp K_VOL_DN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
 &lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &kp BACKSLASH
 &none    &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
@@ -242,7 +250,7 @@
         upper_layer {
 
             bindings = <
-        &kp LEFT                      &mkp LCLK         &mkp LCLK  &kp Y   &kp X
+        &kp LEFT                      &mkp LCLK         &mkp TRACKPAD_PRESS  &kp Y   &kp X
 &kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
 &lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &kp BACKSLASH
 &none     &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
