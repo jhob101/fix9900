@@ -157,7 +157,8 @@ Added here:
   [keyd](https://github.com/rvaiya/keyd) config.
 - Y or B plus the D-pad as a mouse.
 - The keyboard lock.
-- No pointer jump when you lift your thumb, and pointer speed up 20%.
+- A pointer fix: fast movements, and lifting your thumb, no longer throw the
+  pointer backwards. Pointer speed is up 20%.
 - Gentler scrolling that follows your finger speed: slow movement scrolls
   slowly.
 - The trackpad light shows scroll mode.
@@ -291,7 +292,6 @@ Common changes:
 | Y, X, B and A | `Y_KEY`, `X_KEY`, `B_KEY` and `A_KEY` at the top of the keymap |
 | Pointer speed | `CONFIG_TRACKPAD_SPEEDMULTIPLIER_HORIZONTAL` and `_VERTICAL`, in percent |
 | Scroll speed | `CONFIG_TRACKPAD_SCROLL_SPEED`, in percent |
-| Lift detection | `CONFIG_INPUT_A320_OFN_ENGINE`: `0xA0` on, `0x00` off |
 | Trackpad light | `CONFIG_ZMK_TRACKPAD_SCROLL_LIGHT`: `n` leaves it alone |
 | Backlight auto-off delay | `CONFIG_ZMK_IDLE_TIMEOUT`, in milliseconds |
 | One-shot timeout | `release-after-ms` on `osm` and `osl` in the keymap |

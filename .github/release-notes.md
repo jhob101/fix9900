@@ -13,14 +13,12 @@ Download one and follow the
 What every key does is in the
 [README](https://github.com/jhob101/uconsole-bb9900-keyboard#what-it-does).
 
-## New in 1.5.0
+## New in 1.5.1
 
-- **Scrolling follows your finger speed.** Slow movement now scrolls slowly.
-  Before, any movement at all scrolled at a fixed minimum rate.
-- **Scrolling is slower overall**, at 60% of the previous rate.
+- **Fixes the trackpad not registering a finger** on some keyboards, reported
+  on 1.3.0 to 1.5.0. The cause was lift detection, which has been removed.
 
-Scroll speed is `CONFIG_TRACKPAD_SCROLL_SPEED` in `config/bb9900.conf` if you
-build your own.
+If you were affected, flashing this is all that is needed.
 
 ## Before you flash
 
