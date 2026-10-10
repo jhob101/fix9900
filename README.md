@@ -4,8 +4,9 @@ Custom firmware for the [hack2you uConsole trackpad keyboard kit](https://hack2y
 the replacement uConsole keyboard with an optical trackpad in place of the
 trackball.
 
-**It is for the V2.1 keyboard.** It may work on other versions of the
-keyboard, but it has only been tested on V2.1.
+**It is for the V2.1 keyboard, and it does not work on V1.1.** If you have a
+V1.1 keyboard, use [noodleboy91/uconsole-bb9900-keyboard-v1.1](https://github.com/noodleboy91/uconsole-bb9900-keyboard-v1.1),
+a fork of this firmware for that version. Other versions are untested.
 
 It carries over the features of the [qmk-uconsole](https://github.com/jhob101/qmk-uconsole)
 firmware for the original keyboard (gamepad mode, hold-Select scrolling, the
@@ -394,8 +395,9 @@ sudo libinput debug-events --show-keycodes
 
 ## Known limitations
 
-- **Only tested on the V2.1 keyboard.** Other versions of the kit may work but
-  are untried.
+- **V2.1 keyboard only.** It does not work on V1.1: use
+  [noodleboy91/uconsole-bb9900-keyboard-v1.1](https://github.com/noodleboy91/uconsole-bb9900-keyboard-v1.1)
+  for that. Other versions of the kit are untried.
 - **Left Shift after Fn does nothing.** Press Shift before Fn, or use Right
   Shift. This is inherited from the vendor keymap.
 - **Unlocking needs Fn released first.** Holding Fn and tapping Esc twice locks
