@@ -237,6 +237,18 @@
             #binding-cells = <1>;
         };
     };
+
+    // Trackpad lift detection, on Fn + ] and off Fn + [ (both Fn layers). With
+    // it on the pointer does not jump as a thumb is lifted, but on some
+    // trackpads it stops a bare finger registering at all, so it starts off
+    // and each keyboard's choice is saved. zmk,behavior-trackpad-lift lives in
+    // the ZMK fork; what "on" writes to the sensor is in bb9900.conf.
+    behaviors {
+        tp_lift: tp_lift {
+            compatible = "zmk,behavior-trackpad-lift";
+            #binding-cells = <1>;
+        };
+    };
     macros {
         lock_kb: lock_kb {
             compatible = "zmk,behavior-macro";
@@ -282,7 +294,7 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp TRACKPAD_PRESS  &kp Y   &kp X
 &kp K_VOL_UP   &kp K_VOL_DN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &kp BACKSLASH
+&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &tp_lift 0   &tp_lift 1   &none   &kp F11    &kp F12   &kp BACKSLASH
 &none    &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
@@ -298,7 +310,7 @@
             bindings = <
         &kp LEFT                      &mkp LCLK         &mkp TRACKPAD_PRESS  &kp Y   &kp X
 &kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &kp  B      &kp A
-&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &none   &none   &none   &kp F11    &kp F12   &kp BACKSLASH
+&lock_kb  &kp C_AC_PRINT &kp C_PAUSE  &kp C_MUTE &tp_lift 0   &tp_lift 1   &none   &kp F11    &kp F12   &kp BACKSLASH
 &none     &kp F1         &kp F2        &kp F3     &kp F4     &kp F5     &kp F6     &kp F7     &kp F8    &kp F9  &kp F10 &kp DEL
 &kp CAPSLOCK    &kp Q          &kp W         &kp E      &kp R      &kp T      &kp Y      &kp PAGE_UP      &kp INSERT     &kp O   &kp P
 &none    &kp A          &kp S         &kp D      &kp F      &tog GAME  &kp HOME      &kp END      &kp PAGE_DOWN     &kp L   &none &none         
