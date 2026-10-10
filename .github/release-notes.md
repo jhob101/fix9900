@@ -1,9 +1,5 @@
 Firmware for the hack2you uConsole trackpad keyboard, **V2.1**.
 
-**It does not work on the V1.1 keyboard.** For V1.1, use
-[noodleboy91/uconsole-bb9900-keyboard-v1.1](https://github.com/noodleboy91/uconsole-bb9900-keyboard-v1.1),
-a fork of this firmware for that version. Other versions are untested.
-
 ## Which file
 
 | File | What is different |
