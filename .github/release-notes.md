@@ -18,18 +18,18 @@ Download one and follow the
 What every key does is in the
 [README](https://github.com/jhob101/uconsole-bb9900-keyboard#what-it-does).
 
-## New in 1.2.0
+## New in 1.3.0
 
-- **B is a mouse button.** A tap on B is a middle click, or a left click in the
-  middle-click firmware. It used to send F23. Holding B with the D-pad still
-  moves the pointer.
-- **Optional scroll switch.** A key can now turn trackpad scrolling on and off,
-  as on the stock firmware. No key does by default: it takes a one-word change
-  to the keymap and a build of your own. See
-  [Scroll switch](https://github.com/jhob101/uconsole-bb9900-keyboard#scroll-switch),
-  and the
-  [one-handed layout](https://github.com/jhob101/uconsole-bb9900-keyboard#example-a-one-handed-layout)
-  example.
+- **No pointer jump when you lift your thumb.** The trackpad sensor's own lift
+  detection is now switched on. A bug that sent the pointer backwards on fast
+  movements is fixed too.
+- **The trackpad light shows scroll mode.** It goes out while you scroll and
+  comes back afterwards.
+- **Pointer speed** is slightly lower: 20% above stock, down from 30%.
+
+Each of these can be changed or switched off in `config/bb9900.conf` if you
+build your own: see
+[Customising](https://github.com/jhob101/uconsole-bb9900-keyboard#customising).
 
 ## Before you flash
 

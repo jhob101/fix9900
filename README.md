@@ -39,7 +39,7 @@ This is the normal mode. Letters, numbers and punctuation are as printed.
 
 | Control | What it does |
 | --- | --- |
-| Trackpad | Moves the pointer. Pressing it is a left click. |
+| Trackpad | Moves the pointer. Pressing it is a left click. Its light goes out while it is scrolling. |
 | L / R buttons | Left click / right click. |
 | D-pad | Arrow keys. |
 | Select | Hold it and move the trackpad to scroll. A tap on its own sends the Select key (`KEY_FRONT` on Linux). |
@@ -185,7 +185,12 @@ Added here:
 - **The keyboard lock** on Fn + Esc, covering the keys, trackpad and backlight.
 - **Bluetooth switched off.** The right Fn pairing keys (Esc, 1 to 4) now match
   left Fn.
-- **Trackpad pointer speed** raised by 30%.
+- **Trackpad pointer speed** raised by 20%.
+- **No pointer jump when you lift your thumb.** The trackpad sensor's own lift
+  detection is switched on, and fast movements no longer overflow and send the
+  pointer backwards.
+- **The trackpad light shows scroll mode**: it goes out while the trackpad is
+  scrolling.
 - **Volume key fix**: Shift + Speaker no longer leaves Shift stuck on.
 - **Bootloader shortcuts made safe.** In fix9900, Ctrl + `\` or Alt + `\`
   alone entered the bootloader, as did Fn + `\`. The backslash key is now
@@ -383,6 +388,12 @@ Common changes:
 - **Pointer speed:** `CONFIG_TRACKPAD_SPEEDMULTIPLIER_HORIZONTAL` and
   `_VERTICAL` in `bb9900.conf`, in percent. Above about 133 the smallest
   pointer step becomes two pixels.
+- **Lift detection:** `CONFIG_INPUT_A320_OFN_ENGINE` in `bb9900.conf`. `0xA0`
+  is on, `0x00` is off. Turn it off if the trackpad stops responding or
+  misses movement.
+- **Trackpad light:** `CONFIG_ZMK_TRACKPAD_SCROLL_LIGHT` in `bb9900.conf`.
+  `n` leaves the light alone. If your light comes on when scrolling instead
+  of going out, add `CONFIG_ZMK_TRACKPAD_SCROLL_LIGHT_INVERT=y`.
 - **Scroll speed:** `CONFIG_TRACKPAD_SCROLL_INTERVAL` in `bb9900.conf`. Higher
   is slower.
 - **Backlight auto-off delay:** `CONFIG_ZMK_IDLE_TIMEOUT` in `bb9900.conf`, in
@@ -411,7 +422,8 @@ defined in the keymap as `&scroll_toggle`, and no key uses it.
 
 To put it on X, find `default_layer` in `config/bb9900.keymap` and change
 `&kp F22` to `&scroll_toggle`. Any other key works the same way. Holding Select
-still scrolls as well.
+still scrolls as well. The trackpad light is out while the switch is on, so you
+can see which mode you are in.
 
 Then build and flash as in [Building](#building).
 
