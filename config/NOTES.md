@@ -5,7 +5,9 @@
 > behind those fixes.** This fork has since changed some of what they describe:
 >
 > - Trackpad scroll mode is now hold-Select-to-scroll, not click-to-toggle, and
->   the trackpad press is a left click again.
+>   the trackpad press is a left click again. A click-to-toggle scroll switch
+>   can be put on a key (see the README).
+> - A tap on B is a mouse click, not F23.
 > - The volume key behavior was reworked to cope with one-shot Shift.
 > - Bluetooth is switched off.
 > - The bootloader shortcuts changed. Fn+\\ and Ctrl+Alt+\\ are gone (the

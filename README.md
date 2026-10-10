@@ -39,16 +39,21 @@ This is the normal mode. Letters, numbers and punctuation are as printed.
 
 | Control | What it does |
 | --- | --- |
-| Trackpad | Moves the pointer. Pressing it is a left click, or a middle click in the [middle-click firmware](#which-file). |
+| Trackpad | Moves the pointer. Pressing it is a left click. |
 | L / R buttons | Left click / right click. |
 | D-pad | Arrow keys. |
 | Select | Hold it and move the trackpad to scroll. A tap on its own sends the Select key (`KEY_FRONT` on Linux). |
 | Start | Super. |
 | A | The [kitty key](#kitty-key). |
-| Y, B | Hold either and the D-pad moves the pointer. A quick tap on its own sends F21 (Y) or F23 (B). |
+| Y, B | Hold either and the D-pad moves the pointer. |
+| Y tap | F21. |
+| B tap | Middle click. It is sent as you let go, so it clicks but cannot drag. |
 | X | F22. |
 | Speaker | Volume down. With Shift, volume up. With Fn, mute. |
 | Shift, Ctrl, Alt, AltGr | [One-shot modifiers](#one-shot-modifiers). |
+
+The [middle-click firmware](#which-file) swaps two of these: pressing the
+trackpad is a middle click, and a tap on B is a left click.
 
 ### One-shot modifiers
 
@@ -169,7 +174,10 @@ Added here:
 
 - **Gamepad mode** on Fn + G, as a real USB joystick.
 - **Hold Select to scroll**, replacing fix9900's click-the-trackpad toggle.
-- **Trackpad press is left click** again.
+- **Trackpad press is left click** again, with **middle click on B**. A
+  second firmware has the two swapped.
+- **An optional scroll switch**, for anyone who prefers the stock firmware's
+  toggle. No key has it by default: see [Scroll switch](#scroll-switch).
 - **Start is Super** (it was media Play).
 - **The kitty key** on A, and **one-shot modifiers**. These replace a
   [keyd](https://github.com/rvaiya/keyd) config on the uConsole.
@@ -205,12 +213,12 @@ has ready-made firmware attached. Download the file you want and go straight to
 
 ### Which file
 
-The two files differ only in what pressing the trackpad does:
+The two files differ only in where left click and middle click sit:
 
-| File | Pressing the trackpad |
-| --- | --- |
-| `bb9900-zmk.uf2` | Left click |
-| `bb9900-zmk-middle-click.uf2` | Middle click |
+| File | Pressing the trackpad | Tapping B |
+| --- | --- | --- |
+| `bb9900-zmk.uf2` | Left click | Middle click |
+| `bb9900-zmk-middle-click.uf2` | Middle click | Left click |
 
 The L and R buttons are left and right click in both.
 
@@ -367,10 +375,11 @@ sudo systemctl disable --now keyd
 
 Common changes:
 
-- **Trackpad press:** `TRACKPAD_PRESS` near the top of the keymap: `LCLK`,
-  `MCLK` or `RCLK`. The middle-click firmware is the same keymap with this set
-  to `MCLK` from [`build.yaml`](build.yaml), which is also where to add
-  another variant.
+- **Trackpad press and B tap:** `TRACKPAD_PRESS` and `B_CLICK` near the top of
+  the keymap, each `LCLK`, `MCLK` or `RCLK`. Change the pair after the
+  `#else`. The middle-click firmware is the same keymap with
+  `MIDDLE_CLICK_TRACKPAD` defined from [`build.yaml`](build.yaml), which is
+  also where to add another variant.
 - **Pointer speed:** `CONFIG_TRACKPAD_SPEEDMULTIPLIER_HORIZONTAL` and
   `_VERTICAL` in `bb9900.conf`, in percent. Above about 133 the smallest
   pointer step becomes two pixels.
@@ -392,6 +401,55 @@ To check what a key actually sends, on the uConsole:
 ```sh
 sudo libinput debug-events --show-keycodes
 ```
+
+### Scroll switch
+
+The stock firmware had a scroll switch: press a key once and the trackpad
+scrolls, press it again and it moves the pointer. This firmware scrolls while
+Select is held instead, but the switch is there if you want it. It is already
+defined in the keymap as `&scroll_toggle`, and no key uses it.
+
+To put it on X, find `default_layer` in `config/bb9900.keymap` and change
+`&kp F22` to `&scroll_toggle`. Any other key works the same way. Holding Select
+still scrolls as well.
+
+Then build and flash as in [Building](#building).
+
+### Example: a one-handed layout
+
+A worked example, for using the uConsole with the right hand only: the mouse
+buttons and the scroll switch all go on the four face buttons.
+
+| Control | Wanted | Change |
+| --- | --- | --- |
+| Trackpad press | Left click | None, it already is. |
+| Y | Middle click | `&dpad_mouse MOUSE F21` becomes `&mkp MCLK` |
+| X | Scroll switch | `&kp F22` becomes `&scroll_toggle` |
+| B | Right click | `&dpad_mouse_click MOUSE B_CLICK` becomes `&mkp RCLK` |
+| A | F11 | `&osl KITTY` becomes `&kp F11` |
+| Select | Hold to scroll | None, it already is. |
+| Start | Super (the app menu) | None, it already is. |
+
+All four changes are in the first two rows of `default_layer`. The keys on
+those rows run Left, L button, trackpad press, Y, X, then Up, Down, Right,
+R button, B, A. Before:
+
+```
+            &kp LEFT                      &mkp LCLK         &mkp TRACKPAD_PRESS  &dpad_mouse MOUSE F21   &kp F22
+&kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &dpad_mouse_click MOUSE B_CLICK  &osl KITTY
+```
+
+After:
+
+```
+            &kp LEFT                      &mkp LCLK         &mkp TRACKPAD_PRESS  &mkp MCLK   &scroll_toggle
+&kp UP   &kp DOWN &kp RIGHT               &mkp RCLK                       &mkp RCLK  &kp F11
+```
+
+Leave the other layers alone. Two things are given up: Y and B no longer move
+the pointer with the D-pad, and there is no [kitty key](#kitty-key). Y and B
+become ordinary mouse buttons, so they click on press and can be held to drag.
+Gamepad mode is unaffected, since its layer sits on top.
 
 ## Known limitations
 
