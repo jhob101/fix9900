@@ -20,3 +20,7 @@ include:
   - board: bb9900
     cmake-args: -DDTS_EXTRA_CPPFLAGS=-DMIDDLE_CLICK_TRACKPAD
     artifact-name: bb9900-zmk-middle-click
+  # One-handed layout: mouse buttons and a scroll switch on the face buttons.
+  - board: bb9900
+    cmake-args: -DDTS_EXTRA_CPPFLAGS=-DONE_HANDED
+    artifact-name: bb9900-zmk-one-handed

@@ -6,30 +6,24 @@ a fork of this firmware for that version. Other versions are untested.
 
 ## Which file
 
-The two files differ only in where left click and middle click sit:
-
-| File | Pressing the trackpad | Tapping B |
-| --- | --- | --- |
-| `bb9900-zmk.uf2` | Left click | Middle click |
-| `bb9900-zmk-middle-click.uf2` | Middle click | Left click |
+| File | What is different |
+| --- | --- |
+| `bb9900-zmk.uf2` | The standard firmware. Pressing the trackpad is a left click and a tap on B is a middle click. |
+| `bb9900-zmk-middle-click.uf2` | Those two swapped: pressing the trackpad is a middle click and a tap on B is a left click. |
+| `bb9900-zmk-one-handed.uf2` | The [one-handed layout](https://github.com/jhob101/uconsole-bb9900-keyboard#one-handed-layout): Y middle click, B right click, X a scroll switch, A F11. |
 
 Download one and follow the
 [flashing instructions](https://github.com/jhob101/uconsole-bb9900-keyboard#flashing).
 What every key does is in the
 [README](https://github.com/jhob101/uconsole-bb9900-keyboard#what-it-does).
 
-## New in 1.3.0
+## New in 1.4.0
 
-- **No pointer jump when you lift your thumb.** The trackpad sensor's own lift
-  detection is now switched on. A bug that sent the pointer backwards on fast
-  movements is fixed too.
-- **The trackpad light shows scroll mode.** It goes out while you scroll and
-  comes back afterwards.
-- **Pointer speed** is slightly lower: 20% above stock, down from 30%.
+- **A one-handed firmware**, `bb9900-zmk-one-handed.uf2`, with the mouse
+  buttons and a scroll switch on the face buttons for right-hand use. It gives
+  up the D-pad pointer and the kitty key.
 
-Each of these can be changed or switched off in `config/bb9900.conf` if you
-build your own: see
-[Customising](https://github.com/jhob101/uconsole-bb9900-keyboard#customising).
+The other two files are unchanged from 1.3.0.
 
 ## Before you flash
 

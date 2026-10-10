@@ -12,6 +12,17 @@ for that. Other versions are untested.
 > **Flash at your own risk.** This is a spare-time project, tested on one V2.1
 > keyboard. Back up your current firmware first (see [Flashing](#flashing)).
 
+## Contents
+
+- [What it does](#what-it-does)
+- [Changes in this fork](#changes-in-this-fork)
+- [Building](#building)
+- [Flashing](#flashing)
+- [Desktop setup](#desktop-setup)
+- [Customising](#customising)
+- [Known limitations](#known-limitations)
+- [Credits and licence](#credits-and-licence)
+
 ## What it does
 
 USB only: Bluetooth is switched off.
@@ -35,6 +46,21 @@ USB only: Bluetooth is switched off.
 
 The [middle-click firmware](#which-file) swaps two of these: pressing the
 trackpad is a middle click and a tap on B is a left click.
+
+### One-handed layout
+
+A third firmware puts the mouse buttons and a scroll switch on the face
+buttons, for right-hand use:
+
+| Control | What it does |
+| --- | --- |
+| Y | Middle click |
+| B | Right click |
+| X | Scroll switch: press to scroll with the trackpad, press again to stop. The trackpad light is out while it is on. |
+| A | F11 |
+
+Y and B click on press and can be held to drag. Everything else is as above,
+except that there is no D-pad pointer and no kitty key.
 
 ### One-shot modifiers
 
@@ -126,6 +152,7 @@ Added here:
   optional [scroll switch](#scroll-switch) is there for those who prefer one.
 - Trackpad press as left click, middle click on B, and a second firmware with
   the two swapped.
+- A one-handed firmware, with the mouse buttons on the face buttons.
 - Start as Super, the kitty key and one-shot modifiers, replacing a
   [keyd](https://github.com/rvaiya/keyd) config.
 - Y or B plus the D-pad as a mouse.
@@ -147,10 +174,11 @@ and go to [Flashing](#flashing).
 
 ### Which file
 
-| File | Pressing the trackpad | Tapping B |
-| --- | --- | --- |
-| `bb9900-zmk.uf2` | Left click | Middle click |
-| `bb9900-zmk-middle-click.uf2` | Middle click | Left click |
+| File | What is different |
+| --- | --- |
+| `bb9900-zmk.uf2` | The standard firmware, as described above. |
+| `bb9900-zmk-middle-click.uf2` | Pressing the trackpad is a middle click and a tap on B is a left click. |
+| `bb9900-zmk-one-handed.uf2` | The [one-handed layout](#one-handed-layout). |
 
 Build your own only to change the keymap or settings.
 
@@ -158,7 +186,8 @@ Build your own only to change the keymap or settings.
 
 1. Fork this repo and enable Actions on your fork.
 2. Push a commit, or run the workflow from the **Actions** tab.
-3. Download the `firmware` artifact from the finished run. It holds both files.
+3. Download the `firmware` artifact from the finished run. It holds all three
+   files.
 
 ### Locally
 
@@ -197,7 +226,7 @@ changing a `.conf` file or `west.yml`.
 ### Publishing a release
 
 Change the number in [`VERSION`](VERSION) on `main`. That builds the firmware
-and publishes a GitHub Release with both files attached. The release text
+and publishes a GitHub Release with the files attached. The release text
 comes from [`.github/release-notes.md`](.github/release-notes.md).
 
 ## Flashing
@@ -257,6 +286,7 @@ Common changes:
 | What | Where |
 | --- | --- |
 | Trackpad press and B tap | `TRACKPAD_PRESS` and `B_CLICK` at the top of the keymap: `LCLK`, `MCLK` or `RCLK` |
+| Y, X, B and A | `Y_KEY`, `X_KEY`, `B_KEY` and `A_KEY` at the top of the keymap |
 | Pointer speed | `CONFIG_TRACKPAD_SPEEDMULTIPLIER_HORIZONTAL` and `_VERTICAL`, in percent |
 | Scroll speed | `CONFIG_TRACKPAD_SCROLL_INTERVAL`. Higher is slower. |
 | Lift detection | `CONFIG_INPUT_A320_OFN_ENGINE`: `0xA0` on, `0x00` off |
@@ -272,24 +302,17 @@ To see what a key sends: `sudo libinput debug-events --show-keycodes`
 ### Scroll switch
 
 For a key that turns scrolling on and off, as on the stock firmware, bind it to
-`&scroll_toggle`. For X, change `&kp F22` to `&scroll_toggle` in
-`default_layer`. Holding Select still scrolls, and the trackpad light is out
+`&scroll_toggle`. For X on the standard layout, set `X_KEY` to
+`&scroll_toggle`. Holding Select still scrolls, and the trackpad light is out
 while the switch is on.
 
-### Example: a one-handed layout
+### Variants
 
-Mouse buttons and the scroll switch on the four face buttons, for right-hand
-use. Four changes, all in the first two rows of `default_layer`:
-
-| Control | Wanted | Change |
-| --- | --- | --- |
-| Y | Middle click | `&dpad_mouse MOUSE F21` becomes `&mkp MCLK` |
-| X | Scroll switch | `&kp F22` becomes `&scroll_toggle` |
-| B | Right click | `&dpad_mouse_click MOUSE B_CLICK` becomes `&mkp RCLK` |
-| A | F11 | `&osl KITTY` becomes `&kp F11` |
-
-Trackpad press (left click), Select (hold to scroll) and Start (Super) already
-do what this layout wants. It gives up the D-pad pointer and the kitty key.
+<a name="example-a-one-handed-layout"></a>
+The middle-click and one-handed firmware are the same keymap built with
+`MIDDLE_CLICK_TRACKPAD` or `ONE_HANDED` defined, from
+[`build.yaml`](build.yaml). The one-handed layout is the four `_KEY` values
+under `#ifdef ONE_HANDED`, a worked example to copy for a layout of your own.
 
 ## Known limitations
 
