@@ -17,13 +17,14 @@ Download one and follow the
 What every key does is in the
 [README](https://github.com/jhob101/uconsole-bb9900-keyboard#what-it-does).
 
-## New in 1.4.0
+## New in 1.5.0
 
-- **A one-handed firmware**, `bb9900-zmk-one-handed.uf2`, with the mouse
-  buttons and a scroll switch on the face buttons for right-hand use. It gives
-  up the D-pad pointer and the kitty key.
+- **Scrolling follows your finger speed.** Slow movement now scrolls slowly.
+  Before, any movement at all scrolled at a fixed minimum rate.
+- **Scrolling is slower overall**, at 60% of the previous rate.
 
-The other two files are unchanged from 1.3.0.
+Scroll speed is `CONFIG_TRACKPAD_SCROLL_SPEED` in `config/bb9900.conf` if you
+build your own.
 
 ## Before you flash
 
